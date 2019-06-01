@@ -1,6 +1,6 @@
 trait MyAction extends MyStates with RandomDice with History {
   def myAction: Unit = {
-    var up: Int = defence / (swingThousand % 10 + 1)
+    var up: Int = defence / (rnd_0to999 % 10 + 1)
 
     if (justDefence + up > defence * 2)
       justHistory += "しかし なにも おこらなかった。"

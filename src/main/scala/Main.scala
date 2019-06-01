@@ -1,11 +1,12 @@
 import slack.models.Message
 
-object Main extends SetBot with MyAction with EnemyAction {
+object Main extends SetBot {
   def main(args: Array[String]): Unit = {
     client.onMessage { message: Message =>
       if (message.text.contains("scala") ||
         message.text.contains("Scala") ||
-        message.text.contains("スカラ"))
+        message.text.contains("スカラ") ||
+        message.text.contains("すから"))
         start(message)
       //      println(s"HP: ${justHitPoint}, " +
       //        s"MP: ${magicPower}, " +
@@ -20,11 +21,11 @@ object Main extends SetBot with MyAction with EnemyAction {
       .profile
       .get.real_name.getOrElse("名無しさん").toString
 
-    justHistory = s"${userName} のターン:\n :ishi: は Scalaを となえた！"
+    //    justHistory = s"${userName} のターン:\n :ishi: は Scalaを となえた！"
 
-    myAction
-    enemyAction
+    //    myAction
+    //    enemyAction
 
-    client.sendMessage(message.channel, justHistory.mkString)
+    //    client.sendMessage(message.channel, justHistory.mkString)
   }
 }

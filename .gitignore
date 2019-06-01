@@ -6,3 +6,5 @@ target/
 src/main/scala/token\.txt
 
 src/main/scala/token_test\.txt
+
+sample\.sc

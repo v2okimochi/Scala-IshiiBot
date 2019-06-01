@@ -1,15 +1,15 @@
 trait EnemyAction extends EnemyStates with RandomDice with History {
   def enemyAction: Unit = {
-    var enemy: Enemy = enemies(swingThousand % (enemies.length))
+    var enemy: Enemy = enemies(rnd_0to999 % (enemies.length))
     var actionMessage: String =
       if (enemy.actions == "") {
-        attacks(swingThousand % (attacks.length))
+        attacks(rnd_0to999 % (attacks.length))
       } else {
         specialAttacks(enemy.actions)
       }
     justHistory += ("\n" + enemy.name + actionMessage)
 
-    var critical: Boolean = if (swingThousand < 50) true else false
+    var critical: Boolean = if (rnd_0to999 < 50) true else false
 
     var enemyAttackPoint: Int =
       if (critical) {

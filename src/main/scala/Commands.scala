@@ -1,5 +1,9 @@
 abstract case class Command(id: String, mp: Int)
 
+object Status {
+  val id = "status"
+}
+
 object Abilities {
 
   object Scala extends Command("scala", 2)

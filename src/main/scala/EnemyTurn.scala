@@ -13,39 +13,51 @@ object EnemyTurn extends RandomDice {
   }
 
   def endOfEnemyTurn(ishii: IshiiState): IshiiState = {
-    ishii
+    ishii.copy(turn = ishii.turn + 1)
   }
 
   def judgeDead(ishii: IshiiState): IshiiState = {
-    ishii.log +: s"\n:ishi: は ${ishii.damage} の ダメージを うけた！"
+    val newLog =
+      if (ishii.damage <= 0)
+        ishii.log :+ "\n ミス！ :ishi: は ダメージを うけない！"
+      else ishii.log :+ s"\n:ishi: は ${
+        ishii.damage
+      } の ダメージを うけた！"
+
     if (ishii.hitPoint - ishii.damage <= 0) {
-      ishii.log +: ":ishi:はちからつきた。"
-      //これまでの履歴を出す
-      //
-      IshiiState.apply()
+      ishii.copy(condition = Conditions.dead,
+        log = newLog :+ "\n「ぎょええーーー :感嘆符:」 :ishi:はちからつきた。" +
+          s":ishi: は ${ishii.turn} ターン耐え、" +
+          s"守備力を最大${ishii.defence} まで上げた。")
     } else
-      ishii
+      ishii.copy(hitPoint = ishii.hitPoint - ishii.damage,
+        log = newLog)
   }
 
   def calcDamage(ishii: IshiiState): IshiiState = {
     if (random.nextInt(100) < 5) {
-      ishii.log +: "\nつうこんの いちげき！"
-      ishii.copy(damage =
+      val damage =
         getAmpDamage(((EnemyStates.enemies(ishii.enemyNum).attack * 1.5) / 2)
-          .toInt) - ishii.defence / 4)
-    } else ishii.copy(damage =
-      getAmpDamage(EnemyStates.enemies(ishii.enemyNum).attack / 2)
-        - ishii.defence / 4)
+          .toInt) - ishii.defence / 4
+      ishii.copy(damage = if (damage < 0) 0 else damage,
+        log = ishii.log :+ "\nつうこんの いちげき！")
+    } else {
+      val damage =
+        getAmpDamage(EnemyStates.enemies(ishii.enemyNum).attack / 2) -
+          ishii.defence / 4
+      ishii.copy(damage = if (damage < 0) 0 else damage)
+    }
   }
 
   def selectEnemyAction(ishii: IshiiState): IshiiState = {
-    if (EnemyStates.enemies(ishii.enemyNum).actions == "")
-      ishii.log +: EnemyStates.attacks(random.nextInt(EnemyStates
-        .attacks.length))
-    else
-      ishii.log +: EnemyStates.specialAttacks(EnemyStates
-        .enemies(ishii.enemyNum).actions)
-    ishii
+    val newLog =
+      if (EnemyStates.enemies(ishii.enemyNum).actions == "")
+        ishii.log :+ "\n" + EnemyStates.enemies(ishii.enemyNum).name +
+          EnemyStates.attacks(random.nextInt(EnemyStates.attacks.length))
+      else
+        ishii.log :+ "\n" + EnemyStates.enemies(ishii.enemyNum).name +
+          EnemyStates.specialAttacks(EnemyStates.enemies(ishii.enemyNum).actions)
+    ishii.copy(log = newLog)
   }
 
   def selectEnemy(ishii: IshiiState): IshiiState =

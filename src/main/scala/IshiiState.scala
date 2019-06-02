@@ -8,7 +8,7 @@ case class IshiiState(
                        damage: Int = 0,
                        hitPoint: Int = 100,
                        magicPower: Int = 20,
-                       defence: Int = 60,
+                       defence: Int = 30,
                        mental: Int = 5,
                        condition: String = "",
                        log: List[String] = Nil

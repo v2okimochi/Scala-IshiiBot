@@ -7,4 +7,5 @@ class SetBot {
   implicit val system: ActorSystem = ActorSystem("slack")
   implicit val ec: ExecutionContextExecutor = system.dispatcher
   val client: SlackRtmClient = SlackRtmClient(token)
+  val botId: String = client.state.self.id
 }

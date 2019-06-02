@@ -55,6 +55,8 @@ object Main extends SetBot {
     ishiiList = ishiiList.init :+ Turn.start(ishiiList.last
       .copy(user = userName, command = command, log = Nil))
 
+    if (ishiiList.length > 1) ishiiList = ishiiList.tail
+
     val ishii = ishiiList.last
     //    println(s"turn: ${ishii.turn}\n " +
     //      s"スカラターン: ${ishii.scalaTurn}\n " +

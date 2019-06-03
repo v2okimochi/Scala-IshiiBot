@@ -10,5 +10,7 @@ object Abilities {
 
   object Guard extends Command("guard", 0)
 
+  object MagicalHolyWater extends Command("MagicalHolyWater", 0)
+
 }
 

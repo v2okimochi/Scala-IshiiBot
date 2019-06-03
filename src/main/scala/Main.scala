@@ -39,6 +39,8 @@ object Main extends SetBot {
         text.contains("スクルト") |
         text.toLowerCase == "ish scala" => Some(Abilities.Scala.id)
       case "ish guard" => Some(Abilities.Guard.id)
+      case text if text == "ish mhw" | text == "まほうのせいすい" =>
+        Some(Abilities.MagicalHolyWater.id)
       case _ => None
     }
   }
@@ -54,11 +56,11 @@ object Main extends SetBot {
       .copy(user = userName, command = command, log = Nil))
 
     val ishii = ishiiList.last
-        println(s"turn: ${ishii.turn}\n " +
-          s"スカラターン: ${ishii.scalaTurn}\n " +
-          s"HP: ${ishii.hitPoint}\n " +
-          s"MP: ${ishii.magicPower}\n " +
-          s"守備力: ${ishii.defence}")
+    println(s"turn: ${ishii.turn}\n " +
+      s"スカラターン: ${ishii.scalaTurn}\n " +
+      s"HP: ${ishii.hitPoint}\n " +
+      s"MP: ${ishii.magicPower}\n " +
+      s"守備力: ${ishii.defence}")
     client.sendMessage(message.channel, ishiiList.last.log.mkString,
       thread_ts = thread_ts)
 

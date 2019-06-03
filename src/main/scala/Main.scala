@@ -1,7 +1,5 @@
 import slack.models.{BotMessage, Message, MessageReplied, ReplyMessage}
 
-import scala.concurrent.Future
-
 object Main extends SetBot {
   var ishiiList: List[IshiiState] = List(IshiiState.apply())
 
@@ -46,7 +44,7 @@ object Main extends SetBot {
   }
 
   def startByMessage(message: Message, command: String,
-                     thread_ts: Option[String]): Future[Long] = {
+                     thread_ts: Option[String]): Unit = {
     val userName: String = client.apiClient
       .getUserInfo(message.user)
       .profile
@@ -55,15 +53,17 @@ object Main extends SetBot {
     ishiiList = ishiiList.init :+ Turn.start(ishiiList.last
       .copy(user = userName, command = command, log = Nil))
 
-    if (ishiiList.length > 1) ishiiList = ishiiList.tail
-
     val ishii = ishiiList.last
-    //    println(s"turn: ${ishii.turn}\n " +
-    //      s"スカラターン: ${ishii.scalaTurn}\n " +
-    //      s"HP: ${ishii.hitPoint}\n " +
-    //      s"MP: ${ishii.magicPower}\n " +
-    //      s"守備力: ${ishii.defence}")
+        println(s"turn: ${ishii.turn}\n " +
+          s"スカラターン: ${ishii.scalaTurn}\n " +
+          s"HP: ${ishii.hitPoint}\n " +
+          s"MP: ${ishii.magicPower}\n " +
+          s"守備力: ${ishii.defence}")
     client.sendMessage(message.channel, ishiiList.last.log.mkString,
       thread_ts = thread_ts)
+
+    if (ishiiList.length > 1) ishiiList = ishiiList.tail
+    if (ishiiList.last.condition == Conditions.dead)
+      ishiiList = List(IshiiState.apply())
   }
 }

@@ -1,4 +1,4 @@
-object IshiiTurn extends RandomDice {
+object IshiiTurn {
   def apply(ishii: IshiiState): IshiiState = {
     val newLog: List[String] = ishii.log :+ s"${ishii.user} のターン:"
 
@@ -52,7 +52,7 @@ object IshiiTurn extends RandomDice {
     }
 
     //上昇幅決定 ＆ 上昇幅を200までに固定
-    (random.nextInt(4) match {
+    (Turn.random.nextInt(4) match {
       case 0 => (IshiiState.apply().defence * 0.4).toInt //DQ5
       case 1 => (IshiiState.apply().defence * 0.5).toInt //DQ6
       case 2 => IshiiState.apply().defence //DQ3

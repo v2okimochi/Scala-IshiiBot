@@ -9,6 +9,9 @@ object IshiiTurn {
       else ishii.command match {
         case Abilities.Scala.id => doScala(ishii.copy(log = newLog))
         case Abilities.Guard.id => doGuard(ishii.copy(log = newLog))
+        case Abilities.MagicalHolyWater.id =>
+          doMagicalHolyWater(ishii.copy(log = newLog))
+        case _ => throw new Exception("登録されていない行動です")
       }
     )
   }
@@ -27,6 +30,7 @@ object IshiiTurn {
     ishii
   }
 
+  //スカラの行動
   def doScala(ishii: IshiiState): IshiiState = {
     val newLog: List[String] = ishii.log :+ "\n :ishi: は Scalaを となえた！"
 
@@ -74,8 +78,23 @@ object IshiiTurn {
     }
   }
 
-  def doGuard(ishii: IshiiState): IshiiState = {
+  //防御
+  def doGuard(ishii: IshiiState): IshiiState =
     ishii.copy(log = ishii.log :+ ":ishi: は みをまもっている。")
+
+  //まほうのせいすい
+  def doMagicalHolyWater(ishii: IshiiState): IshiiState = {
+    val txt: String = "\n :ishi: は まほうのせいすいを つかった！"
+    val up: Int = Turn.random.nextInt(20) + 1
+    val limitedUp: Int =
+      if (ishii.magicPower + up > IshiiState.apply().magicPower)
+        IshiiState.apply().magicPower - ishii.magicPower
+      else up
+
+    if (ishii.magicPower < IshiiState.apply().magicPower)
+      ishii.copy(magicPower = ishii.magicPower + limitedUp,
+        log = ishii.log :+ (txt + s":ishi: の MPが ${limitedUp} かいふくした！"))
+    else ishii.copy(log = ishii.log :+ (txt + "しかし なにも おこらなかった。"))
   }
 
   def fixMP(mp: Int): Int = if (mp < 0) 0 else mp

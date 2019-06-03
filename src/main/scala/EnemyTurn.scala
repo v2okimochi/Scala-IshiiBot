@@ -1,15 +1,7 @@
 object EnemyTurn {
   def apply(ishii: IshiiState): IshiiState = {
     //敵を決定 ==> 敵の行動を決定 ==> ダメージ計算 ==> 死亡判定 ==> 最後の処理
-    endOfEnemyTurn(
-      judgeDead(
-        calcDamage(
-          selectEnemyAction(
-            selectEnemy(ishii)
-          )
-        )
-      )
-    )
+    endOfEnemyTurn(judgeDead(calcDamage(selectEnemyAction(selectEnemy(ishii)))))
   }
 
   def endOfEnemyTurn(ishii: IshiiState): IshiiState = {
@@ -26,7 +18,6 @@ object EnemyTurn {
 
     if (ishii.hitPoint - ishii.damage <= 0) {
       ishii.copy(condition = Conditions.dead,
-        hitPoint = IshiiState.apply().hitPoint,
         log = newLog :+ "\n「ぎょええーーー！」 :ishi:はちからつきた。" +
           s":ishi: は ${ishii.turn} ターン耐え、" +
           s"最後の守備力は${ishii.defence} だった。")

@@ -1,4 +1,4 @@
-import slack.models.{BotMessage, Message, MessageReplied, ReplyMessage}
+import slack.models.Message
 
 object Main extends SetBot {
   var ishiiList: List[IshiiState] = List(IshiiState.apply())
@@ -7,44 +7,28 @@ object Main extends SetBot {
     client.onEvent {
       //チャンネルに書き込まれた＆スレッド返信ではない
       case message: Message =>
-        if (message.text == "ish status") {
-          client.sendMessage(message.channel, showStatus(ishiiList.last),
-            message.thread_ts)
+        message match {
+          case msg if Help.search(msg.text).isDefined =>
+            help(msg, Help.search(msg.text).get, msg.thread_ts)
+          case msg if Abilities.search(msg.text).isDefined =>
+            startByMessage(msg, Abilities.search(msg.text).get, msg.thread_ts)
         }
-        if (selectCommand(message.text).isDefined)
-          startByMessage(message, selectCommand(message.text).get,
-            message.thread_ts)
       case _ => //ignore
     }
   }
 
-  def showStatus(ishii: IshiiState): String = {
-    val txt = s":ishi: のHPは のこり${ishii.hitPoint}よ。"
-    ishii.hitPoint match {
-      case hp if hp < 10 =>
-        txt + ":ishi: は もうダメだわ…… つよく いきてね。"
-      case hp if hp < 50 =>
-        txt + "なんてこと してくれたのよ！ もう あとがないじゃない。"
-      case hp if hp < 80 =>
-        txt + "ちょっと ゆだんしないでよ！ ちゃんと きんちょうかんを もちなさい。"
-      case _ => txt + "べつに あんたのために がんばるんじゃ ないんだからね。"
+  // statusなどのヘルプ表示
+  def help(message: Message, command: String,
+           thread_ts: Option[String]): Unit = {
+    command match {
+      case Help.Status.id =>
+        client.sendMessage(message.channel, Help.showStatus(ishiiList.last),
+          message.thread_ts)
+      case _ => //ignore
     }
   }
 
-  def selectCommand(text: String): Option[String] = {
-    text match {
-      case text if text.contains("すから") |
-        text.contains("スカラ") |
-        text.contains("すくると") |
-        text.contains("スクルト") |
-        text.toLowerCase == "ish scala" => Some(Abilities.Scala.id)
-      case "ish guard" => Some(Abilities.Guard.id)
-      case text if text == "ish mhw" | text == "まほうのせいすい" =>
-        Some(Abilities.MagicalHolyWater.id)
-      case _ => None
-    }
-  }
-
+  // 1ターンの戦いが始まる
   def startByMessage(message: Message, command: String,
                      thread_ts: Option[String]): Unit = {
     val userName: String = client.apiClient

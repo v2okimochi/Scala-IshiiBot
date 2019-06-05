@@ -4,10 +4,12 @@ object EnemyTurn {
     endOfEnemyTurn(judgeDead(calcDamage(selectEnemyAction(selectEnemy(ishii)))))
   }
 
+  // 1ターン終了時の処理
   def endOfEnemyTurn(ishii: IshiiState): IshiiState = {
     ishii.copy(turn = ishii.turn + 1)
   }
 
+  // ダメージ処理と死亡判定
   def judgeDead(ishii: IshiiState): IshiiState = {
     val newLog =
       if (ishii.damage <= 0)

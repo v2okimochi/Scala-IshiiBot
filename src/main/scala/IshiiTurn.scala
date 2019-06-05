@@ -2,7 +2,7 @@ object IshiiTurn {
   def apply(ishii: IshiiState): IshiiState = {
     val newLog: List[String] = ishii.log :+ s"${ishii.user} のターン:"
 
-    //ishiiの行動 ==> 行動後の処理
+    // ishiiの行動 ==> 行動後の処理
     endOfIshiiTurn(
       if (ishii.mental < 3) doMadAction(ishii
         .copy(log = newLog))
@@ -16,6 +16,7 @@ object IshiiTurn {
     )
   }
 
+  // ishiiの行動後の処理
   def endOfIshiiTurn(ishii: IshiiState): IshiiState = {
     ishii.scalaTurn match {
       case turn if turn + 1 > 5 =>
@@ -26,6 +27,7 @@ object IshiiTurn {
     }
   }
 
+  // メンタルがやられている時の行動
   def doMadAction(ishii: IshiiState): IshiiState = {
     ishii
   }
@@ -97,5 +99,6 @@ object IshiiTurn {
     else ishii.copy(log = ishii.log :+ (txt + "しかし なにも おこらなかった。"))
   }
 
+  // MPが負の値にならないように修正
   def fixMP(mp: Int): Int = if (mp < 0) 0 else mp
 }

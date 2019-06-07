@@ -12,4 +12,6 @@ case class IshiiState(
                        mental: Int = 5,
                        condition: String = "",
                        log: List[String] = Nil
-                     )
+                     ) {
+  def isGuarding: Boolean = command.contains(Command.Guard)
+}

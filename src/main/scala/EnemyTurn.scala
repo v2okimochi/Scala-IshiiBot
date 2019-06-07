@@ -49,7 +49,7 @@ object EnemyTurn {
 
   //防御ならダメージを半分にする
   def judgeGuard(ishii: IshiiState): IshiiState =
-    if (ishii.command == Abilities.Guard.id)
+    if (ishii.isGuarding)
       ishii.copy(damage = (ishii.damage * 0.5).toInt)
     else ishii
 

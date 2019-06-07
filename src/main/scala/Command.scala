@@ -1,7 +1,7 @@
 // ishiiの行動選択肢
 sealed abstract class Command(val id: String, val mp: Int)
 
-object Abilities {
+object Command {
 
   case object Scala extends Command(id = "scala", mp = 2)
 

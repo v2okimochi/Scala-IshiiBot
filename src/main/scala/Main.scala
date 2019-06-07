@@ -10,7 +10,7 @@ object Main extends SetBot {
         message match {
           case msg if Help.search(msg.text).isDefined =>
             help(msg, Help.search(msg.text).get, msg.thread_ts)
-          case msg => Abilities.parse(msg.text).foreach(c => startByMessage(msg, Some(c), msg.thread_ts))
+          case msg => Command.parse(msg.text).foreach(c => startByMessage(msg, Some(c), msg.thread_ts))
         }
       case _ => //ignore
     }

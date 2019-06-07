@@ -1,13 +1,13 @@
 // ishiiの行動選択肢
-sealed abstract class Command(val id: String, val mp: Int)
+sealed abstract class Command(val mp: Int)
 
 object Command {
 
-  case object Scala extends Command(id = "scala", mp = 2)
+  case object Scala extends Command(mp = 2)
 
-  case object Guard extends Command(id = "guard", mp = 0)
+  case object Guard extends Command(mp = 0)
 
-  case object MagicalHolyWater extends Command("MagicalHolyWater", 0)
+  case object MagicalHolyWater extends Command(mp = 0)
 
   def parse(commandString: String): Option[Command] = {
 

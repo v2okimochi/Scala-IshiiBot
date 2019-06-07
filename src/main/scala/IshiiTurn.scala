@@ -7,9 +7,9 @@ object IshiiTurn {
       if (ishii.mental < 3) doMadAction(ishii
         .copy(log = newLog))
       else ishii.command match {
-        case Abilities.Scala.id => doScala(ishii.copy(log = newLog))
-        case Abilities.Guard.id => doGuard(ishii.copy(log = newLog))
-        case Abilities.MagicalHolyWater.id =>
+        case Some(Abilities.Scala) => doScala(ishii.copy(log = newLog))
+        case Some(Abilities.Guard) => doGuard(ishii.copy(log = newLog))
+        case Some(Abilities.MagicalHolyWater) =>
           doMagicalHolyWater(ishii.copy(log = newLog))
         case _ => throw new Exception("登録されていない行動です")
       }

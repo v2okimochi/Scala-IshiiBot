@@ -1,26 +1,31 @@
 // ishiiの行動選択肢
-abstract case class Command(id: String, mp: Int)
+sealed abstract class Command(val id: String, val mp: Int)
 
 object Abilities {
 
-  object Scala extends Command(id = "scala", mp = 2)
+  case object Scala extends Command(id = "scala", mp = 2)
 
-  object Guard extends Command(id = "guard", mp = 0)
+  case object Guard extends Command(id = "guard", mp = 0)
 
-  object MagicalHolyWater extends Command("MagicalHolyWater", 0)
+  case object MagicalHolyWater extends Command("MagicalHolyWater", 0)
 
-  def search(text: String): Option[String] = {
-    text match {
-      case text if text.contains("すから") |
-        text.contains("スカラ") |
-        text.contains("すくると") |
-        text.contains("スクルト") |
-        text.toLowerCase == "ish scala" => Some(Scala.id)
-      case "ish guard" => Some(Guard.id)
-      case text if text == "ish mhw" | text == "まほうのせいすい" =>
-        Some(MagicalHolyWater.id)
+  def parse(commandString: String): Option[Command] = {
+
+    val scalaWords = List("すから", "スカラ", "すくると", "スクルト", "ish scala")
+    val guardWords = List("ぼうぎょ","ish guard")
+    val magicalHolyWaterWords = List("まほうのせいすい", "ish mhw")
+
+    commandString match {
+      case s if matches(s, scalaWords) => Some(Scala)
+      case s if matches(s, guardWords) => Some(Guard)
+      case s if matches(s, magicalHolyWaterWords) => Some(MagicalHolyWater)
       case _ => None
     }
+  }
+
+  private def matches(rawString: String, wordList: List[String], matchCase: Boolean = false): Boolean = {
+    val s = if (matchCase) rawString else rawString.toLowerCase // アルファベットは小文字になり、日本語はそのまま保持される
+    wordList.exists(s.contains(_))
   }
 }
 

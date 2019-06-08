@@ -10,8 +10,7 @@ object Main extends SetBot {
         message match {
           case msg if Help.search(msg.text).isDefined =>
             help(msg, Help.search(msg.text).get, msg.thread_ts)
-          case msg if Abilities.search(msg.text).isDefined =>
-            startByMessage(msg, Abilities.search(msg.text).get, msg.thread_ts)
+          case msg => Command.parse(msg.text).foreach(c => startByMessage(msg, Some(c), msg.thread_ts))
         }
       case _ => //ignore
     }
@@ -29,7 +28,7 @@ object Main extends SetBot {
   }
 
   // 1ターンの戦いが始まる
-  def startByMessage(message: Message, command: String,
+  def startByMessage(message: Message, command: Option[Command],
                      thread_ts: Option[String]): Unit = {
     val userName: String = client.apiClient
       .getUserInfo(message.user)

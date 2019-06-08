@@ -7,9 +7,9 @@ object IshiiTurn {
       if (ishii.mental < 3) doMadAction(ishii
         .copy(log = newLog))
       else ishii.command match {
-        case Abilities.Scala.id => doScala(ishii.copy(log = newLog))
-        case Abilities.Guard.id => doGuard(ishii.copy(log = newLog))
-        case Abilities.MagicalHolyWater.id =>
+        case Some(Command.Scala) => doScala(ishii.copy(log = newLog))
+        case Some(Command.Guard) => doGuard(ishii.copy(log = newLog))
+        case Some(Command.MagicalHolyWater) =>
           doMagicalHolyWater(ishii.copy(log = newLog))
         case _ => throw new Exception("登録されていない行動です")
       }
@@ -39,21 +39,21 @@ object IshiiTurn {
     // MP不足
     if (ishii.magicPower < 2) {
       return ishii.copy(
-        magicPower = fixMP(ishii.magicPower - Abilities.Scala.mp),
+        magicPower = fixMP(ishii.magicPower - Command.Scala.mp),
         log = newLog :+ "しかし MPがたりない！")
     }
 
     //呪文封じ
     if (ishii.condition == Conditions.fizzle) {
       return ishii.copy(
-        magicPower = fixMP(ishii.magicPower - Abilities.Scala.mp),
+        magicPower = fixMP(ishii.magicPower - Command.Scala.mp),
         log = newLog :+ "しかし じゅもんは ふうじられている！")
     }
 
     //守備力の上昇上限
     if (ishii.defence - IshiiState.apply().defence >= 200) {
       return ishii.copy(
-        magicPower = fixMP(ishii.magicPower - Abilities.Scala.mp),
+        magicPower = fixMP(ishii.magicPower - Command.Scala.mp),
         log = newLog :+ "しかし なにも おこらなかった。")
     }
 
@@ -66,14 +66,14 @@ object IshiiTurn {
     }) match {
       case up if IshiiState.apply().defence + up > 200 =>
         ishii.copy(
-          magicPower = fixMP(ishii.magicPower - Abilities.Scala.mp),
+          magicPower = fixMP(ishii.magicPower - Command.Scala.mp),
           defence = IshiiState.apply().defence + 200,
           log = newLog :+ s":ishi: の しゅびりょくが" +
             s" ${200 - ishii.defence} あがった！",
           scalaTurn = ishii.scalaTurn - 1)
       case up =>
         ishii.copy(
-          magicPower = fixMP(ishii.magicPower - Abilities.Scala.mp),
+          magicPower = fixMP(ishii.magicPower - Command.Scala.mp),
           defence = ishii.defence + up,
           log = newLog :+ s":ishi: の しゅびりょくが ${up} あがった！",
           scalaTurn = if (ishii.scalaTurn == -1) 0 else ishii.scalaTurn - 1)

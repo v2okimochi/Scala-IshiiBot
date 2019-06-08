@@ -80,8 +80,8 @@ ishii.copy(hitPoint = IshiiState.apply().hitPoint)
 ```
 
 ## ishiiの行動を増やしたい
-- ishiiの行動選択肢はAbilities.scalaにまとめています
-- 固有のIDと消費MPをobjectで設定し、どの発言に反応させたいかをsearchメソッド内に追記します
+- ishiiの行動選択肢はCommand.scalaにまとめています
+- Commandを継承したオブジェクトを設定し、どの発言に反応させたいかをparseメソッド内に追記します
 - 最後にIshiiTurn.scalaのdoXXXメソッドとして実際の処理を追記します
 - 追記したメソッドをapplyメソッド内で紐付ければbotが行動できるようになります
 

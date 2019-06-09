@@ -22,6 +22,12 @@
 - botはチャンネル内の発言やコマンドに反応します
 - スレッド内で使うとスレッドに発言します
 
+New!
+ローカル環境でbotを動かせるようになりました
+- slackとlocalどちらで動かすかは、SlackClient
+.scalaのSlackClientImplクラスとSlackClientLocalMockどちらを使うかで決めます
+- Main.scalaのMainオブジェクト内でどちらをインスタンス化するか指定してください（初期設定はSlackClientImpl）
+
 ## ステータス確認
 `ish status`
 
@@ -45,6 +51,8 @@
 
 ## 防御してやり過ごす
 `ish guard`
+
+`ぼうぎょ`
 
 - 敵の攻撃は防御することで半分に減らせます
 - なんと痛恨の一撃もダメージを半分にできます

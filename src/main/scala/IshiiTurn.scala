@@ -4,13 +4,13 @@ object IshiiTurn {
 
     // ishiiの行動 ==> 行動後の処理
     endOfIshiiTurn(
-      if (ishii.mental < 3) doMadAction(ishii
-        .copy(log = newLog))
+      if (ishii.mental < 3) doMadAction(ishii.copy(log = newLog))
       else ishii.command match {
         case Some(Command.Scala) => doScala(ishii.copy(log = newLog))
         case Some(Command.Guard) => doGuard(ishii.copy(log = newLog))
         case Some(Command.MagicalHolyWater) =>
           doMagicalHolyWater(ishii.copy(log = newLog))
+        case Some(Command.Escape) => doEscape(ishii.copy(log = newLog))
         case _ => throw new Exception("登録されていない行動です")
       }
     )
@@ -99,6 +99,19 @@ object IshiiTurn {
     else ishii.copy(log = ishii.log :+ (txt + "しかし なにも おこらなかった。"))
   }
 
+  //にげる
+  def doEscape(ishii: IshiiState): IshiiState = {
+    val actionMessage: String = ":ishi: は にげだした！"
+    val isSuccessed: Boolean = Turn.random.nextInt(1) == 0
+    val newLog: List[String] =
+      if (isSuccessed) ishii.log :+ actionMessage
+      else ishii.log :+ "しかし まわりこまれてしまった！"
+    
+    ishii.copy(condition =
+      if (isSuccessed) Conditions.escaped else ishii.condition,
+      log = newLog)
+  }
+
   // MPが負の値にならないように修正
-  def fixMP(mp: Int): Int = if (mp < 0) 0 else mp
+  private def fixMP(mp: Int): Int = if (mp < 0) 0 else mp
 }

@@ -22,9 +22,20 @@ trait Main {
     val userName: String = slackClient.getUserName(message)
 
     ishiiList = ishiiList.init :+ Turn.start(ishiiList.last
-      .copy(user = userName, command = Some(command), log = Nil))
+      .copy(user = userName, command = Some(command),
+        condition = if (ishiiList.last.condition == Conditions.escaped) ""
+        else ishiiList.last.condition,
+        log = Nil))
 
     val ishii = ishiiList.last
+
+    //にげるに成功したらチャンネルを離れる
+    if (ishiiList.last.condition == Conditions.escaped) {
+      println("成功")
+      slackClient.leaveChannel(message)
+      return
+    }
+
     println(s"turn: ${ishii.turn}\n " +
       s"スカラターン: ${ishii.scalaTurn}\n " +
       s"HP: ${ishii.hitPoint}\n " +
@@ -40,8 +51,8 @@ trait Main {
 
 object Main extends Main {
   val slackClient: SlackClient =
-      new SlackClientImpl
-//    new SlackClientLocalMock
+    new SlackClientImpl
+  //    new SlackClientLocalMock
 
   def main(args: Array[String]): Unit = slackClient.listen(switchMessage)
 }

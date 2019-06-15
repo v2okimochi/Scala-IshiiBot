@@ -39,7 +39,9 @@ trait Main {
 }
 
 object Main extends Main {
-  val slackClient: SlackClient = new SlackClientImpl
+  val slackClient: SlackClient =
+      new SlackClientImpl
+//    new SlackClientLocalMock
 
   def main(args: Array[String]): Unit = slackClient.listen(switchMessage)
 }

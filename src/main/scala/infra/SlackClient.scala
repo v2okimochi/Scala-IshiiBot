@@ -1,8 +1,10 @@
+package infra
+
 import akka.actor.ActorSystem
+import slack.api.{BlockingSlackApiClient, SlackApiClient}
 import slack.models.Message
 import slack.rtm.SlackRtmClient
-import slack.api.SlackApiClient
-import slack.api.BlockingSlackApiClient
+
 import scala.concurrent.ExecutionContextExecutor
 import scala.io.StdIn
 

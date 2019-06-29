@@ -1,3 +1,6 @@
+import app.Turn
+import domain.{Command, Conditions, Help, IshiiState}
+import infra.{FileAccess, SlackClient, SlackClientImpl}
 import slack.models.Message
 
 trait Main extends FileAccess {
@@ -63,7 +66,7 @@ trait Main extends FileAccess {
 object Main extends Main {
   val slackClient: SlackClient =
     new SlackClientImpl
-  //    new SlackClientLocalMock
+  //    new infra.SlackClientLocalMock
 
   def main(args: Array[String]): Unit = slackClient.listen(switchMessage)
 }

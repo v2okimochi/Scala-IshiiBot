@@ -1,3 +1,5 @@
+package domain
+
 case class IshiiState(
                        turn: Int = 0, // ishiiが耐えたターン数
                        scalaTurn: Int = -1, // Scalaの効果持続ターン数

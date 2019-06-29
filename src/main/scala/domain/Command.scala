@@ -1,3 +1,5 @@
+package domain
+
 // ishiiの行動選択肢
 sealed abstract class Command(val mp: Int)
 

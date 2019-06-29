@@ -1,3 +1,5 @@
 \.idea/
 target/
 sample\.sc
+
+src/main/scala/muteUsersList\.data

@@ -1,3 +1,7 @@
+package app
+
+import domain.{Conditions, EnemyStates, IshiiState}
+
 object EnemyTurn {
   def apply(ishii: IshiiState): IshiiState = {
     //敵を決定 ==> 敵の行動を決定 ==> ダメージ計算 ==> 死亡判定 ==> 最後の処理

@@ -1,5 +1,10 @@
-import scala.util.Random
+package app
+
 import java.security.SecureRandom
+
+import domain.IshiiState
+
+import scala.util.Random
 
 object Turn {
   val random = new Random(new SecureRandom)

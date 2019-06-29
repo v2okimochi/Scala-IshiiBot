@@ -1,3 +1,8 @@
+package app
+
+import domain.{Command, Conditions, IshiiState}
+import infra.FileAccess
+
 object IshiiTurn extends FileAccess {
   def apply(ishii: IshiiState): IshiiState = {
     val newLog: List[String] = ishii.log :+ s"${ishii.userName} のターン:"

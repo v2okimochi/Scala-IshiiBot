@@ -1,3 +1,5 @@
+package domain
+
 // statusなど行動以外のヘルプ
 abstract case class Preference(id: String)
 

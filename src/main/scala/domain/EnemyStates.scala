@@ -1,3 +1,5 @@
+package domain
+
 object EnemyStates {
   val attacks: List[String] = List(
     "の おきもち！",

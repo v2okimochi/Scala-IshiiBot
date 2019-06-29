@@ -97,7 +97,7 @@ Copyright (c) 2015 Bryan Gilbert
 Released under the MIT license
 
 ## 開発者の方は、ローカル環境でbotを動かすことができます
-- slackとlocalどちらで動かすかは、SlackClient
+- slackとlocalどちらで動かすかは、infra.SlackClient
 .scalaのSlackClientImplクラスとSlackClientLocalMockどちらを使うかで決めます
 - Main.scalaのMainオブジェクト内でどちらをインスタンス化するか指定してください（初期設定はSlackClientImpl）
 

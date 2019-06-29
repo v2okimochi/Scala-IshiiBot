@@ -87,8 +87,14 @@
 
 
 # プルリクのすすめ
+- MITライセンスです
 - Pull requests and issues are very welcomeをしています
 - プルリクしたいけどコードがよくわからない場合は質問歓迎です。できる限り答えます
+
+## 使用する外部ライブラリ
+- [slack-scala-client](https://github.com/slack-scala-client/slack-scala-client)
+Copyright (c) 2015 Bryan Gilbert
+Released under the MIT license
 
 ## 開発者の方は、ローカル環境でbotを動かすことができます
 - slackとlocalどちらで動かすかは、SlackClient

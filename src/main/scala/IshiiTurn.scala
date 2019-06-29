@@ -1,6 +1,6 @@
-object IshiiTurn {
+object IshiiTurn extends FileAccess {
   def apply(ishii: IshiiState): IshiiState = {
-    val newLog: List[String] = ishii.log :+ s"${ishii.user} のターン:"
+    val newLog: List[String] = ishii.log :+ s"${ishii.userName} のターン:"
 
     // ishiiの行動 ==> 行動後の処理
     endOfIshiiTurn(
@@ -102,14 +102,16 @@ object IshiiTurn {
   //にげる
   def doEscape(ishii: IshiiState): IshiiState = {
     val actionMessage: String = ":ishi: は にげだした！"
-    val isSuccessed: Boolean = Turn.random.nextInt(1) == 0
-    val newLog: List[String] =
-      if (isSuccessed) ishii.log :+ actionMessage
-      else ishii.log :+ "しかし まわりこまれてしまった！"
-    
-    ishii.copy(condition =
-      if (isSuccessed) Conditions.escaped else ishii.condition,
-      log = newLog)
+    val isSuccessed: Boolean = Turn.random.nextInt(4) == 0
+
+    if (isSuccessed) {
+      val newMuteUsersList: List[String] = readFile(fileNameOfMuteUsers) :+ ishii.channelId
+      println(newMuteUsersList)
+      writeListToFile(fileNameOfMuteUsers, newMuteUsersList)
+      ishii.copy(command = Some(Command.SuccessEscape), log = ishii.log :+ actionMessage)
+    }
+    else ishii.copy(condition = ishii.condition,
+      log = List(actionMessage + "しかし まわりこまれてしまった！"))
   }
 
   // MPが負の値にならないように修正

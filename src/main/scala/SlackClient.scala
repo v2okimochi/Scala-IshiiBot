@@ -3,9 +3,7 @@ import slack.models.Message
 import slack.rtm.SlackRtmClient
 import slack.api.SlackApiClient
 import slack.api.BlockingSlackApiClient
-
-import scala.concurrent.{Await, ExecutionContextExecutor}
-import scala.concurrent.duration._
+import scala.concurrent.ExecutionContextExecutor
 import scala.io.StdIn
 
 trait SlackClient {
@@ -14,8 +12,6 @@ trait SlackClient {
   def sendMessage(originalMessage: Message, text: String): Unit
 
   def getUserName(message: Message): String
-
-  def leaveChannel(message: Message): Unit
 }
 
 // slack apiの設定
@@ -34,20 +30,13 @@ class SlackClientImpl extends SlackClient {
     case _ => //ignore
   }
 
-  override def sendMessage(originalMessage: Message, text: String): Unit = {
+  override def sendMessage(originalMessage: Message, text: String): Unit = 
     rtmClient.sendMessage(originalMessage.channel, text, originalMessage.thread_ts)
-  }
-
+  
   override def getUserName(message: Message): String = rtmClient.apiClient
     .getUserInfo(message.user)
     .profile
     .get.real_name.getOrElse("名無しさん").toString
-
-  override def leaveChannel(message: Message): Unit = {
-    val result = client.leaveChannel(message.channel)
-    Await.ready(result, 5000 millisecond)
-    println(result)
-  }
 }
 
 class SlackClientLocalMock extends SlackClient {
@@ -57,7 +46,12 @@ class SlackClientLocalMock extends SlackClient {
     def waitInput(input: String): Unit = input match {
       case "q" => quit()
       case s => {
-        action(Message("", "", "Mockさん", s, None, None))
+        action(Message(ts = "",
+          channel = "channel1",
+          user = "Mockさん",
+          text = s,
+          is_starred = None,
+          thread_ts = None))
         waitInput(StdIn.readLine())
       }
     }
@@ -65,12 +59,8 @@ class SlackClientLocalMock extends SlackClient {
     waitInput(StdIn.readLine())
   }
 
-  override def sendMessage(originalMessage: Message, text: String): Unit = {
+  override def sendMessage(originalMessage: Message, text: String): Unit =
     println(text)
-  }
 
   override def getUserName(message: Message): String = message.user
-
-  override def leaveChannel(message: Message): Unit = println("成功")
-
 }

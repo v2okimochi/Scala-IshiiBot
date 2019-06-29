@@ -1,6 +1,7 @@
 package app
 
 import domain.{Conditions, EnemyStates, IshiiState}
+import infra.Randomize
 
 object EnemyTurn {
   def apply(ishii: IshiiState): IshiiState = {
@@ -37,7 +38,7 @@ object EnemyTurn {
 
   //一定の確率で痛恨ダメージにする
   def judgeCritical(ishii: IshiiState): IshiiState = {
-    if (Turn.random.nextInt(100) < 5) {
+    if (Randomize.random.nextInt(100) < 5) {
       val damage = getAmpDamage(((EnemyStates.enemies(ishii.enemyNum)
         .attack * 1.5) / 2).toInt) - ishii.defence / 4
 
@@ -62,7 +63,7 @@ object EnemyTurn {
     val newLog =
       if (EnemyStates.enemies(ishii.enemyNum).actions == "")
         ishii.log :+ "\n" + EnemyStates.enemies(ishii.enemyNum).name +
-          EnemyStates.attacks(Turn.random.nextInt(EnemyStates.attacks.length))
+          EnemyStates.attacks(Randomize.random.nextInt(EnemyStates.attacks.length))
       else
         ishii.log :+ "\n" + EnemyStates.enemies(ishii.enemyNum).name +
           EnemyStates.specialAttacks(EnemyStates.enemies(ishii.enemyNum).actions)
@@ -71,9 +72,8 @@ object EnemyTurn {
 
   //敵をランダムに決める
   def selectEnemy(ishii: IshiiState): IshiiState =
-    ishii.copy(enemyNum = Turn.random.nextInt(EnemyStates.enemies.length))
+    ishii.copy(enemyNum = Randomize.random.nextInt(EnemyStates.enemies.length))
 
   // 1/6から-1/6までランダムに揺らして返す
-  def getAmpDamage(damage: Int): Int =
-    Turn.random.nextInt((damage * 2 / 6) + 1) + damage - damage / 6
+  def getAmpDamage(damage: Int): Int = Randomize.random.nextInt((damage * 2 / 6) + 1) + damage - damage / 6
 }

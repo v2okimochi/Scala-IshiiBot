@@ -1,7 +1,7 @@
 package app
 
 import domain.{Command, Conditions, IshiiState}
-import infra.FileAccess
+import infra.{FileAccess, Randomize}
 
 object IshiiTurn extends FileAccess {
   def apply(ishii: IshiiState): IshiiState = {
@@ -63,7 +63,7 @@ object IshiiTurn extends FileAccess {
     }
 
     //上昇幅決定 ＆ 上昇幅を200までに固定
-    (Turn.random.nextInt(4) match {
+    (Randomize.random.nextInt(4) match {
       case 0 => (IshiiState.apply().defence * 0.4).toInt //DQ5
       case 1 => (IshiiState.apply().defence * 0.5).toInt //DQ6
       case 2 => IshiiState.apply().defence //DQ3
@@ -92,7 +92,7 @@ object IshiiTurn extends FileAccess {
   //まほうのせいすい
   def doMagicalHolyWater(ishii: IshiiState): IshiiState = {
     val txt: String = "\n :ishi: は まほうのせいすいを つかった！"
-    val up: Int = Turn.random.nextInt(20) + 1
+    val up: Int = Randomize.random.nextInt(20) + 1
     val limitedUp: Int =
       if (ishii.magicPower + up > IshiiState.apply().magicPower)
         IshiiState.apply().magicPower - ishii.magicPower
@@ -107,7 +107,7 @@ object IshiiTurn extends FileAccess {
   //にげる
   def doEscape(ishii: IshiiState): IshiiState = {
     val actionMessage: String = ":ishi: は にげだした！"
-    val isSuccessed: Boolean = Turn.random.nextInt(4) == 0
+    val isSuccessed: Boolean = Randomize.random.nextInt(4) == 0
 
     if (isSuccessed) {
       val newMuteUsersList: List[String] = readFile(fileNameOfMuteUsers) :+ ishii.channelId

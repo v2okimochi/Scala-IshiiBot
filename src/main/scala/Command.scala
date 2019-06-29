@@ -9,6 +9,12 @@ object Command {
 
   case object MagicalHolyWater extends Command(mp = 0)
 
+  case object Escape extends Command(mp = 0)
+
+  case object SuccessEscape extends Command(mp = 0)
+
+  case object Fight extends Command(mp = 0)
+
   private val scalaWords: Set[String] = Set("すから", "すくると")
   private val scalaPerfectWords: Set[String] = Set("ish scala", "スカラ", "スクルト")
   private val guardPerfectWords: Set[String] = Set("ぼうぎょ", "ish guard")
@@ -16,12 +22,14 @@ object Command {
   private val mhwPerfectWords: Set[String] =
     Set("ish mhw", "ish magicalholywater")
 
+  def isEscape(commandString: String): Boolean = commandString == "にげる"
+
+  def isFight(commandString: String): Boolean = commandString == "たたかう"
+
   def parse(commandString: String): Option[Command] = commandString match {
-    case s if matches(s, scalaWords) || perfectMatches(s, scalaPerfectWords) =>
-      Some(Scala)
+    case s if matches(s, scalaWords) || perfectMatches(s, scalaPerfectWords) => Some(Scala)
     case s if perfectMatches(s, guardPerfectWords) => Some(Guard)
-    case s if matches(s, mhwWords) || perfectMatches(s, mhwPerfectWords) =>
-      Some(MagicalHolyWater)
+    case s if matches(s, mhwWords) || perfectMatches(s, mhwPerfectWords) => Some(MagicalHolyWater)
     case _ => None
   }
 

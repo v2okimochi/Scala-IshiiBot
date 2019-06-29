@@ -1,13 +1,16 @@
 import akka.actor.ActorSystem
 import slack.models.Message
 import slack.rtm.SlackRtmClient
-
+import slack.api.SlackApiClient
+import slack.api.BlockingSlackApiClient
 import scala.concurrent.ExecutionContextExecutor
 import scala.io.StdIn
 
 trait SlackClient {
   def listen(action: Message => Unit): Unit
+
   def sendMessage(originalMessage: Message, text: String): Unit
+
   def getUserName(message: Message): String
 }
 
@@ -17,38 +20,47 @@ class SlackClientImpl extends SlackClient {
   private implicit val system: ActorSystem = ActorSystem("slack")
   private implicit val ec: ExecutionContextExecutor = system.dispatcher
   private val token: String = sys.env("SCALA_BOT_TOKEN")
-  private val client: SlackRtmClient = SlackRtmClient(token)
+  private val rtmClient: SlackRtmClient = SlackRtmClient(token)
+  private val client = SlackApiClient(token)
+  private val block = BlockingSlackApiClient(token)
 
-  def listen(action: Message => Unit): Unit = client.onEvent {
+  override def listen(action: Message => Unit): Unit = rtmClient.onEvent {
     //チャンネルに書き込まれた＆スレッド返信ではない
     case m: Message => action(m)
     case _ => //ignore
   }
 
-  def sendMessage(originalMessage: Message, text: String): Unit = {
-    client.sendMessage(originalMessage.channel, text, originalMessage.thread_ts)
-  }
-
-  def getUserName(message: Message): String = client.apiClient
-      .getUserInfo(message.user)
-      .profile
-      .get.real_name.getOrElse("名無しさん").toString
+  override def sendMessage(originalMessage: Message, text: String): Unit = 
+    rtmClient.sendMessage(originalMessage.channel, text, originalMessage.thread_ts)
+  
+  override def getUserName(message: Message): String = rtmClient.apiClient
+    .getUserInfo(message.user)
+    .profile
+    .get.real_name.getOrElse("名無しさん").toString
 }
 
 class SlackClientLocalMock extends SlackClient {
-  def quit(): Unit = ()
-  def listen(action: Message => Unit): Unit = {
+  private def quit(): Unit = ()
+
+  override def listen(action: Message => Unit): Unit = {
     def waitInput(input: String): Unit = input match {
       case "q" => quit()
       case s => {
-        action(Message("", "", "Mockさん", s, None, None))
+        action(Message(ts = "",
+          channel = "channel1",
+          user = "Mockさん",
+          text = s,
+          is_starred = None,
+          thread_ts = None))
         waitInput(StdIn.readLine())
       }
     }
+
     waitInput(StdIn.readLine())
   }
-  def sendMessage(originalMessage: Message, text: String): Unit = {
+
+  override def sendMessage(originalMessage: Message, text: String): Unit =
     println(text)
-  }
-  def getUserName(message: Message): String = message.user
+
+  override def getUserName(message: Message): String = message.user
 }

@@ -1,5 +1,5 @@
 import app.Turn
-import domain.{Command, Conditions, Help, IshiiState}
+import domain.{Command, Condition, Help, IshiiState, Score, Scoring}
 import infra.{FileAccess, Randomize, SlackClient, SlackClientImpl}
 import slack.models.Message
 
@@ -8,7 +8,7 @@ trait Main extends FileAccess {
   val slackClient: SlackClient
 
   // 既にミュートリストにあるチャンネルならtrue
-  def isMutedChannel(channelId: String): Boolean =
+  private def isMutedChannel(channelId: String): Boolean =
     readFile(fileNameOfMuteUsers).contains(channelId)
 
   // slackに投稿された発言を解析
@@ -45,34 +45,67 @@ trait Main extends FileAccess {
   // 1ターンの戦いが始まる
   def startByMessage(message: Message, command: Command): Unit = {
     val userName: String = slackClient.getUserName(message)
-
-    ishiiList = ishiiList.init :+ Turn.start(ishiiList.last
+    val ishiiOfOneTurn: IshiiState = Turn.start(ishiiList.last
       .copy(channelId = message.channel,
         userName = userName,
         command = Some(command),
-        condition = if (ishiiList.last.condition == Conditions.escaped) ""
-        else ishiiList.last.condition,
+        condition = ishiiList.last.condition,
         log = Nil))
 
-    val ishii = ishiiList.last
+    if (ishiiOfOneTurn.command.isDefined) ishiiList :+= ishiiOfOneTurn
+    //    debugStatusPrint(ishiiList.last)
 
-    //    println(s"turn: ${ishii.turn}\n " +
-    //      s"スカラターン: ${ishii.scalaTurn}\n " +
-    //      s"HP: ${ishii.hitPoint}\n " +
-    //      s"MP: ${ishii.magicPower}\n " +
-    //      s"守備力: ${ishii.defence}")
+    // 1ターンのログを発言
     slackClient.sendMessage(message, ishiiList.last.log.mkString)
 
-    if (ishiiList.length > 1) ishiiList = ishiiList.tail
-    if (ishiiList.last.condition == Conditions.dead)
+    // ishiiが力尽きたらターンログと得点を発言してishiiListをリセット
+    if (ishiiList.last.condition == Some(Condition.Dead)) {
+      val turnHistoryText: String = getTurnHistoryText(message, ishiiList)
+      val scoreText: String = getScoreText(message, Scoring.getScoreList(ishiiList))
+      slackClient.sendMessage(message, turnHistoryText + scoreText)
       ishiiList = List(IshiiState.apply())
+    }
   }
+
+  // 力尽きるまでの得点を整理して発言
+  private def getScoreText(message: Message, scoreList: Seq[Score]): String = {
+    val text: String = "===== 得点ランキング =====\n"
+    val scoreListText: Seq[String] = scoreList.map(score =>
+      s"${scoreList.indexOf(score) + 1}位：${score.userName} ${score.score}点")
+    text + scoreListText.mkString("\n") + "\n"
+  }
+
+  // 力尽きるまでのターンログを整理して発言
+  private def getTurnHistoryText(message: Message, ishiiList: List[IshiiState]): String = {
+    val text: String = "===== ターンログ =====\n"
+    val turnLogList: List[String] = ishiiList.tail.map(ishii => {
+      val condition: String = ishii.condition match {
+        case Some(c) => c.label
+        case None => "なし"
+      }
+      val command: String = ishii.command match {
+        case Some(c) => c.label
+        case None => "なし"
+      }
+      s"${ishii.turn}ターン目 " +
+        s"(状態異常：$condition) " +
+        s"${ishii.userName}の命令：$command"
+    })
+    text + turnLogList.mkString("\n") + "\n"
+  }
+
+  private def debugStatusPrint(ishii: IshiiState): Unit =
+    println(s"turn: ${ishii.turn}\n " +
+      s"スカラターン: ${ishii.scalaTurn}\n " +
+      s"HP: ${ishii.hitPoint}\n " +
+      s"MP: ${ishii.magicPower}\n " +
+      s"守備力: ${ishii.defence}")
 }
 
 object Main extends Main {
   val slackClient: SlackClient =
     new SlackClientImpl
-  //    new infra.SlackClientLocalMock
+  //        new infra.SlackClientLocalMock
 
   def main(args: Array[String]): Unit = slackClient.listen(switchMessage)
 }

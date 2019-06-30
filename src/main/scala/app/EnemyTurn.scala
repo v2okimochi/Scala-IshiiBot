@@ -1,6 +1,6 @@
 package app
 
-import domain.{Conditions, EnemyStates, IshiiState}
+import domain.{Condition, EnemyStates, IshiiState}
 import infra.Randomize
 
 object EnemyTurn {
@@ -24,7 +24,7 @@ object EnemyTurn {
       } の ダメージを うけた！"
 
     if (ishii.hitPoint - ishii.damage <= 0) {
-      ishii.copy(condition = Conditions.dead,
+      ishii.copy(condition = Some(Condition.Dead),
         log = newLog :+ "\n「ぎょええーーー！」 :ishi:はちからつきた。" +
           s":ishi: は ${ishii.turn} ターン耐え、" +
           s"最後の守備力は${ishii.defence} だった。")

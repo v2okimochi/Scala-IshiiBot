@@ -1,6 +1,6 @@
 package app
 
-import domain.{Command, Conditions, IshiiState}
+import domain.{Command, Condition, IshiiState}
 import infra.{FileAccess, Randomize}
 
 object IshiiTurn extends FileAccess {
@@ -49,7 +49,7 @@ object IshiiTurn extends FileAccess {
     }
 
     //呪文封じ
-    if (ishii.condition == Conditions.fizzle) {
+    if (ishii.condition == Condition.Fizzle.id) {
       return ishii.copy(
         magicPower = fixMP(ishii.magicPower - Command.Scala.mp),
         log = newLog :+ "しかし じゅもんは ふうじられている！")
@@ -111,7 +111,6 @@ object IshiiTurn extends FileAccess {
 
     if (isSuccessed) {
       val newMuteUsersList: List[String] = readFile(fileNameOfMuteUsers) :+ ishii.channelId
-      println(newMuteUsersList)
       writeListToFile(fileNameOfMuteUsers, newMuteUsersList)
       ishii.copy(command = Some(Command.SuccessEscape), log = ishii.log :+ actionMessage)
     }

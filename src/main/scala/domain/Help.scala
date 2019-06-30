@@ -48,7 +48,6 @@ object Help {
   )
 
   def getStatusMessage(ishii: IshiiState, randomNumber: Int): String = {
-    println(s"randomNum: $randomNumber")
     val hpMessage: String = s":ishi: のHPは のこり${ishii.hitPoint}よ。"
     val filteredMessageList: Seq[StatusMessages] = statusMessageList
       .filter(ishii.hitPoint >= _.minHP)

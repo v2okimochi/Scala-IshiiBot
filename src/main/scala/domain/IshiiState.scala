@@ -13,7 +13,7 @@ case class IshiiState(
                        magicPower: Int = 20,
                        defence: Int = 30,
                        mental: Int = 5,
-                       condition: String = "",
+                       condition: Option[Condition] = None,
                        log: List[String] = Nil
                      ) {
   def isGuarding: Boolean = command.contains(Command.Guard)

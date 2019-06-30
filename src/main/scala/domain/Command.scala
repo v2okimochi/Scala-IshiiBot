@@ -1,21 +1,21 @@
 package domain
 
 // ishiiの行動選択肢
-sealed abstract class Command(val mp: Int)
+sealed abstract class Command(val label: String, val mp: Int, val score: Int)
 
 object Command {
 
-  case object Scala extends Command(mp = 2)
+  case object Scala extends Command(label = "Scala", mp = 2, score = 100)
 
-  case object Guard extends Command(mp = 0)
+  case object Guard extends Command(label = "ぼうぎょ", mp = 0, score = 50)
 
-  case object MagicalHolyWater extends Command(mp = 0)
+  case object MagicalHolyWater extends Command(label = "まほうのせいすい", mp = 0, score = 300)
 
-  case object Escape extends Command(mp = 0)
+  case object Escape extends Command(label = "にげる (失敗)", mp = 0, score = -100)
 
-  case object SuccessEscape extends Command(mp = 0)
+  case object SuccessEscape extends Command(label = "にげる (成功)", mp = 0, score = -100)
 
-  case object Fight extends Command(mp = 0)
+  case object Fight extends Command(label = "たたかう", mp = 0, score = 0)
 
   private val scalaWords: Set[String] = Set("すから", "すくると")
   private val scalaPerfectWords: Set[String] = Set("ish scala", "スカラ", "スクルト")

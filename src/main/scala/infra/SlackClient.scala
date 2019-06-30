@@ -13,6 +13,8 @@ trait SlackClient {
   def sendMessage(originalMessage: Message, text: String): Unit
 
   def getUserName(message: Message): String
+
+  def isBot(message: Message): Boolean
 }
 
 // slack apiの設定
@@ -31,13 +33,19 @@ class SlackClientImpl extends SlackClient {
     case _ => //ignore
   }
 
-  override def sendMessage(originalMessage: Message, text: String): Unit = 
+  override def sendMessage(originalMessage: Message, text: String): Unit =
     rtmClient.sendMessage(originalMessage.channel, text, originalMessage.thread_ts)
-  
+
   override def getUserName(message: Message): String = rtmClient.apiClient
     .getUserInfo(message.user)
     .profile
     .get.real_name.getOrElse("名無しさん").toString
+
+  override def isBot(message: Message): Boolean =
+    rtmClient.apiClient.getUserInfo(message.user).is_bot match {
+      case Some(isBot) => isBot
+      case None => false
+    }
 }
 
 class SlackClientLocalMock extends SlackClient {
@@ -64,4 +72,6 @@ class SlackClientLocalMock extends SlackClient {
     println(text)
 
   override def getUserName(message: Message): String = message.user
+
+  override def isBot(message: Message): Boolean = false
 }

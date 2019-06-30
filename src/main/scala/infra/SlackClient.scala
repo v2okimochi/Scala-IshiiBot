@@ -15,8 +15,6 @@ trait SlackClient {
   def getUserName(message: Message): String
 
   def isBot(message: Message): Boolean
-
-  def isOwner(message: Message): Boolean
 }
 
 // slack apiの設定
@@ -76,6 +74,4 @@ class SlackClientLocalMock extends SlackClient {
   override def getUserName(message: Message): String = message.user
 
   override def isBot(message: Message): Boolean = false
-
-  override def isOwner(message: Message): Boolean = true
 }

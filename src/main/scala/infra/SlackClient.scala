@@ -4,7 +4,6 @@ import akka.actor.ActorSystem
 import slack.api.{BlockingSlackApiClient, SlackApiClient}
 import slack.models.Message
 import slack.rtm.SlackRtmClient
-
 import scala.concurrent.ExecutionContextExecutor
 import scala.io.StdIn
 

@@ -1,48 +1,74 @@
 package domain
 
 // ishiiの行動選択肢
-sealed abstract class Command(val label: String, val mp: Int, val score: Int)
+sealed abstract class Command(val label: String, val mp: Int, val score: Int){
+  val substrings: Set[String] = Set.empty
+  val perfectMatchingWords: Set[String] = Set.empty
+}
 
 object Command {
 
-  case object Scala extends Command(label = "Scala", mp = 2, score = 100)
-
-  case object Guard extends Command(label = "ぼうぎょ", mp = 0, score = 50)
-
-  case object MagicalHolyWater extends Command(label = "まほうのせいすい", mp = 0, score = 300)
-
-  case object Escape extends Command(label = "にげる (失敗)", mp = 0, score = -100)
-
-  case object SuccessEscape extends Command(label = "にげる (成功)", mp = 0, score = -100)
-
-  case object Fight extends Command(label = "たたかう", mp = 0, score = 0)
-
-  private val scalaWords: Set[String] = Set("すから", "すくると")
-  private val scalaPerfectWords: Set[String] = Set("ish scala", "スカラ", "スクルト")
-  private val guardPerfectWords: Set[String] = Set("ぼうぎょ", "ish guard")
-  private val mhwWords: Set[String] = Set("まほうのせいすい")
-  private val mhwPerfectWords: Set[String] =
-    Set("ish mhw", "ish magicalholywater")
-
-  def isEscape(commandString: String): Boolean = commandString == "にげる"
-
-  def isFight(commandString: String): Boolean = commandString == "たたかう"
-
-  def parse(commandString: String): Option[Command] = commandString match {
-    case s if matches(s, scalaWords) || perfectMatches(s, scalaPerfectWords) => Some(Scala)
-    case s if perfectMatches(s, guardPerfectWords) => Some(Guard)
-    case s if matches(s, mhwWords) || perfectMatches(s, mhwPerfectWords) => Some(MagicalHolyWater)
-    case _ => None
+  case object Scala extends Command("Scala", 2, 100){
+    override val substrings: Set[String] = Set(
+      "すから",
+      "すくると"
+    )
+    override val perfectMatchingWords: Set[String] = Set(
+      "ish scala",
+      "スカラ",
+      "スクルト"
+    )
   }
 
-  //部分一致
-  private def matches(rawString: String, words: Set[String], matchCase: Boolean = false): Boolean = {
-    val s = if (matchCase) rawString else rawString.toLowerCase // アルファベットは小文字になり、日本語はそのまま保持される
-    words.exists(s.contains(_))
+  case object Guard extends Command("ぼうぎょ", 0, 50){
+    override val substrings: Set[String] = Set.empty
+    override val perfectMatchingWords: Set[String] = Set(
+      "ぼうぎょ",
+      "ish guard"
+    )
   }
 
-  //完全一致
-  private def perfectMatches(rawString: String, words: Set[String]): Boolean =
-    words.exists(rawString.toLowerCase.equals)
+  case object MagicalHolyWater extends Command("まほうのせいすい", 0, 300){
+    override val substrings: Set[String] = Set(
+      "まほうのせいすい"
+    )
+    override val perfectMatchingWords: Set[String] = Set(
+      "ish mhw",
+      "ish magicalholywater"
+    )
+  }
+
+  sealed abstract class Escape extends Command("にげる", 0, -100){
+    override val perfectMatchingWords: Set[String] = Set(
+      "にげる"
+    )
+  }
+
+  case object FailureEscape extends Escape{
+    override val label: String ="にげる (失敗)"
+  }
+
+  case object SuccessEscape extends Escape{
+    override val label = "にげる (成功)"
+  }
+
+  case object Fight extends Command("たたかう", 0, 0){
+    override val perfectMatchingWords: Set[String] = Set(
+      "たたかう"
+    )
+  }
+
+  def isEscape(commandString: String): Boolean =
+    isMatchedCommand(commandString, new Escape {})
+
+  def isFight(commandString: String): Boolean =
+    isMatchedCommand(commandString, Fight)
+
+  def parse(commandString: String): Option[Command] =
+    Seq(Scala, Guard, MagicalHolyWater)
+      .find(isMatchedCommand(commandString, _))
+
+  private def isMatchedCommand(commandString: String, command: Command): Boolean =
+    command.substrings.exists(commandString.toLowerCase.contains(_)) ||
+      command.perfectMatchingWords.exists(commandString.toLowerCase.equals)
 }
-

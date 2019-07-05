@@ -16,13 +16,13 @@ trait Main extends FileAccess {
     case msg if isMutedChannel(msg.channel) =>
       // ミュート時はこの分岐だけに飛ぶ
       if (Command.isFight(msg.text)) fight(msg, Command.Fight)
-    case msg if Command.isEscape(msg.text) => escape(msg, Command.Escape)
+    case msg if Command.isEscape(msg.text) => escape(msg, Command.FailureEscape)
     case msg if Help.search(msg.text).isDefined => help(msg, Help.search(msg.text).get)
     case msg => Command.parse(msg.text).foreach(c => startByMessage(msg, c))
   }
 
   // チャンネルをミュート
-  def escape(message: Message, command: Command): Unit = startByMessage(message, Command.Escape)
+  def escape(message: Message, command: Command): Unit = startByMessage(message, Command.FailureEscape)
 
   // チャンネルのミュートを解除
   def fight(message: Message, command: Command): Unit = {

@@ -1,78 +1,86 @@
 package app
 
-import domain.{Condition, EnemyStates, IshiiState, Randomize}
+import domain.{AttackCategory, AttackMessage, Condition, Enemy, IshiiState, Randomize, TurnState}
 
 object EnemyTurn {
-  def apply(ishii: IshiiState): IshiiState = {
+  def apply(turn: TurnState): TurnState = {
     //敵を決定 ==> 敵の行動を決定 ==> ダメージ計算 ==> 死亡判定 ==> 最後の処理
-    endOfEnemyTurn(judgeDead(calcDamage(selectEnemyAction(selectEnemy(ishii)))))
+    endOfEnemyTurn(judgeDead(calcDamage(selectEnemyAction(turn))))
   }
 
   // 1ターン終了時の処理
-  def endOfEnemyTurn(ishii: IshiiState): IshiiState = {
-    ishii.copy(turn = ishii.turn + 1)
+  def endOfEnemyTurn(turn: TurnState): TurnState = {
+    turn.copy(number = turn.number + 1)
   }
 
   // ダメージ処理と死亡判定
-  def judgeDead(ishii: IshiiState): IshiiState = {
-    val newLog =
-      if (ishii.damage <= 0)
-        ishii.log :+ "\n ミス！ :ishi: は ダメージを うけない！"
-      else ishii.log :+ s"\n:ishi: は ${
-        ishii.damage
+  def judgeDead(turn: TurnState): TurnState = {
+    val newLog: String =
+      if (turn.damage <= 0)
+        turn.log + "\n ミス！ :ishi: は ダメージを うけない！"
+      else turn.log + s"\n:ishi: は ${
+        turn.damage
       } の ダメージを うけた！"
 
-    if (ishii.hitPoint - ishii.damage <= 0) {
-      ishii.copy(condition = Some(Condition.Dead),
-        log = newLog :+ "\n「ぎょええーーー！」 :ishi:はちからつきた。" +
-          s":ishi: は ${ishii.turn} ターン耐え、" +
-          s"最後の守備力は${ishii.defence} だった。")
+    if (turn.ishiiState.hitPoint - turn.damage <= 0) {
+      turn.copy(
+        ishiiState = turn.ishiiState.copy(
+          condition = Some(Condition.Dead)
+        ),
+        log = newLog + "\n「ぎょええーーー！」 :ishi:はちからつきた。" +
+          s":ishi: は ${turn.number} ターン耐え、" +
+          s"最後の守備力は${turn.ishiiState.defence} だった。")
     } else
-      ishii.copy(hitPoint = ishii.hitPoint - ishii.damage,
+      turn.copy(
+        ishiiState = turn.ishiiState.copy(
+          hitPoint = turn.ishiiState.hitPoint - turn.damage
+        ),
         log = newLog)
   }
 
-  def calcDamage(ishii: IshiiState): IshiiState =
-    judgeGuard(judgeCritical(ishii)).copy()
+  def calcDamage(turn: TurnState): TurnState = {
+    val (baseDamage, criticalLog) =
+      if (isCritical)
+        (getCriticalBaseDamage(turn.ishiiState, turn.enemy), "\nつうこんの いちげき！")
+      else
+        (getBaseDamage(turn.ishiiState, turn.enemy), "")
 
-  //一定の確率で痛恨ダメージにする
-  def judgeCritical(ishii: IshiiState): IshiiState = {
-    if (Randomize.random.nextInt(100) < 5) {
-      val damage = getAmpDamage(((EnemyStates.enemies(ishii.enemyNum)
-        .attack * 1.5) / 2).toInt) - ishii.defence / 4
+    val judgedCritical: TurnState = turn.copy(
+      damage = baseDamage,
+      log = turn.log + criticalLog
+    )
 
-      ishii.copy(damage = if (damage < 0) 0 else damage,
-        log = ishii.log :+ "\nつうこんの いちげき！")
-    } else {
-      val damage = getAmpDamage(EnemyStates.enemies(ishii.enemyNum)
-        .attack / 2) - ishii.defence / 4
+    val judgedGuard: TurnState = judgeGuard(judgedCritical)
 
-      ishii.copy(damage = if (damage < 0) 0 else damage)
-    }
+    judgedGuard
+  }
+
+  def isCritical: Boolean = Randomize.random.nextInt(100) < 5
+
+  def getBaseDamage(ishii: IshiiState, enemy: Enemy): Int = {
+    val damage = getAmpDamage(enemy.force / 2) - ishii.defence / 4
+    if (damage < 0) 0 else damage
+  }
+
+  def getCriticalBaseDamage(ishii: IshiiState, enemy: Enemy): Int = {
+    val damage = getAmpDamage((enemy.force * 1.5 / 2).toInt) - ishii.defence / 4
+    if (damage < 0) 0 else damage
   }
 
   //防御ならダメージを半分にする
-  def judgeGuard(ishii: IshiiState): IshiiState =
-    if (ishii.isGuarding)
-      ishii.copy(damage = (ishii.damage * 0.5).toInt)
-    else ishii
+  def judgeGuard(turn: TurnState): TurnState =
+    if (turn.ishiiState.isGuarding)
+      turn.copy(damage = (turn.damage * 0.5).toInt)
+    else turn
 
   //敵によって行動を決める
-  def selectEnemyAction(ishii: IshiiState): IshiiState = {
-    val newLog =
-      if (EnemyStates.enemies(ishii.enemyNum).actions == "")
-        ishii.log :+ "\n" + EnemyStates.enemies(ishii.enemyNum).name +
-          EnemyStates.attacks(Randomize.random.nextInt(EnemyStates.attacks.length))
-      else
-        ishii.log :+ "\n" + EnemyStates.enemies(ishii.enemyNum).name +
-          EnemyStates.specialAttacks(EnemyStates.enemies(ishii.enemyNum).actions)
-    ishii.copy(log = newLog)
-  }
+  def selectEnemyAction(turn: TurnState): TurnState = {
+    val attackMessage: String = "\n" + turn.enemy.name + turn.enemy.attackMessage.getRandomMessage
 
-  //敵をランダムに決める
-  def selectEnemy(ishii: IshiiState): IshiiState =
-    ishii.copy(enemyNum = Randomize.random.nextInt(EnemyStates.enemies.length))
+    turn.copy(log = turn.log + attackMessage)
+  }
 
   // 1/6から-1/6までランダムに揺らして返す
   def getAmpDamage(damage: Int): Int = Randomize.random.nextInt((damage * 2 / 6) + 1) + damage - damage / 6
+
 }

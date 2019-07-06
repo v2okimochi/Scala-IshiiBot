@@ -5,10 +5,16 @@ case class Enemy(
                   force: Int, //攻撃力
                   attackCategory: AttackCategory, // 攻撃の種類
                   attackMessage: AttackMessage // 攻撃メッセージ
-                ) 
+                )
 
 object Enemy {
-  val enemies: Seq[Enemy] = Seq(
+  def getRandomEnemy: Enemy = {
+    val random = Randomize.random.nextInt(enemyList.length)
+    println(s"random: $random")
+    enemyList(random)
+  }
+
+  val enemyList: Seq[Enemy] = Seq(
     Enemy(name = "JVM", force = 80, attackCategory = AttackCategory.NoCategory, attackMessage = AttackMessage.Neutral),
     Enemy(name = "JDK", force = 80, attackCategory = AttackCategory.NoCategory, attackMessage = AttackMessage.Neutral),
     Enemy(name = "Maven", force = 80, attackCategory = AttackCategory.NoCategory, attackMessage = AttackMessage.Neutral),

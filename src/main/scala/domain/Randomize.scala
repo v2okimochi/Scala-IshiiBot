@@ -1,6 +1,7 @@
-package infra
+package domain
 
 import java.security.SecureRandom
+
 import scala.util.Random
 
 object Randomize {

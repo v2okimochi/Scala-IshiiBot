@@ -1,65 +1,74 @@
 package app
 
-import domain.{Command, Condition, IshiiState}
-import infra.{FileAccess, Randomize}
+import domain.{Command, Condition, IshiiState, Randomize, TurnState}
+import infra.FileAccess
 
 object IshiiTurn extends FileAccess {
-  def apply(ishii: IshiiState): IshiiState = {
-    val newLog: List[String] = ishii.log :+ s"${ishii.userName} のターン:"
+  def apply(turn: TurnState): TurnState = {
+    val newLog: String = turn.log + s"${turn.userName} のターン:"
 
     // ishiiの行動 ==> 行動後の処理
     endOfIshiiTurn(
-      if (ishii.mental < 3) doMadAction(ishii.copy(log = newLog))
-      else ishii.command match {
-        case Some(Command.Scala) => doScala(ishii.copy(log = newLog))
-        case Some(Command.Guard) => doGuard(ishii.copy(log = newLog))
+      if (turn.ishiiState.mental < 3) doMadAction(turn.copy(log = newLog))
+      else turn.ishiiState.command match {
+        case Some(Command.Scala) => doScala(turn.copy(log = newLog))
+        case Some(Command.Guard) => doGuard(turn.copy(log = newLog))
         case Some(Command.MagicalHolyWater) =>
-          doMagicalHolyWater(ishii.copy(log = newLog))
-        case Some(Command.FailureEscape) => doEscape(ishii.copy(log = newLog))
+          doMagicalHolyWater(turn.copy(log = newLog))
+        case Some(Command.FailureEscape) => doEscape(turn.copy(log = newLog))
         case _ => throw new Exception("登録されていない行動です")
       }
     )
   }
 
   // ishiiの行動後の処理
-  def endOfIshiiTurn(ishii: IshiiState): IshiiState = {
-    ishii.scalaTurn match {
-      case turn if turn + 1 > 5 =>
-        ishii.copy(defence = IshiiState.apply().defence, scalaTurn = -1,
-          log = ishii.log :+ ":ishi: の しゅびりょくが もとにもどった。")
-      case -1 => ishii
-      case _ => ishii.copy(scalaTurn = ishii.scalaTurn + 1)
+  def endOfIshiiTurn(turn: TurnState): TurnState = {
+    turn.scalaTurnNumber match {
+      case turnNum if turnNum + 1 > 5 =>
+        turn.copy(
+          ishiiState = turn.ishiiState.copy(defence = IshiiState.apply().defence),
+          scalaTurnNumber = -1,
+          log = turn.log + ":ishi: の しゅびりょくが もとにもどった。"
+        )
+      case -1 => turn
+      case _ => turn.copy(scalaTurnNumber = turn.scalaTurnNumber + 1)
     }
   }
 
   // メンタルがやられている時の行動
-  def doMadAction(ishii: IshiiState): IshiiState = {
-    ishii
+  def doMadAction(turn: TurnState): TurnState = {
+    turn
   }
 
   //スカラの行動
-  def doScala(ishii: IshiiState): IshiiState = {
-    val newLog: List[String] = ishii.log :+ "\n :ishi: は Scalaを となえた！"
+  def doScala(turn: TurnState): TurnState = {
+    val newLog: String = turn.log + "\n :ishi: は Scalaを となえた！"
 
     // MP不足
-    if (ishii.magicPower < 2) {
-      return ishii.copy(
-        magicPower = fixMP(ishii.magicPower - Command.Scala.mp),
-        log = newLog :+ "しかし MPがたりない！")
+    if (turn.ishiiState.magicPower < 2) {
+      return turn.copy(
+        ishiiState = turn.ishiiState.copy(
+          magicPower = fixMP(turn.ishiiState.magicPower - Command.Scala.mp)
+        ),
+        log = newLog + "しかし MPがたりない！")
     }
 
     //呪文封じ
-    if (ishii.condition == Condition.Fizzle.id) {
-      return ishii.copy(
-        magicPower = fixMP(ishii.magicPower - Command.Scala.mp),
-        log = newLog :+ "しかし じゅもんは ふうじられている！")
+    if (turn.ishiiState.condition == Condition.Fizzle.id) {
+      return turn.copy(
+        ishiiState = turn.ishiiState.copy(
+          magicPower = fixMP(turn.ishiiState.magicPower - Command.Scala.mp)
+        ),
+        log = newLog + "しかし じゅもんは ふうじられている！")
     }
 
     //守備力の上昇上限
-    if (ishii.defence - IshiiState.apply().defence >= 200) {
-      return ishii.copy(
-        magicPower = fixMP(ishii.magicPower - Command.Scala.mp),
-        log = newLog :+ "しかし なにも おこらなかった。")
+    if (turn.ishiiState.defence - IshiiState.apply().defence >= 200) {
+      return turn.copy(
+        ishiiState = turn.ishiiState.copy(
+          magicPower = fixMP(turn.ishiiState.magicPower - Command.Scala.mp)
+        ),
+        log = newLog + "しかし なにも おこらなかった。")
     }
 
     //上昇幅決定 ＆ 上昇幅を200までに固定
@@ -70,52 +79,67 @@ object IshiiTurn extends FileAccess {
       case 3 => (IshiiState.apply().defence * 1.5).toInt //DQ4
     }) match {
       case up if IshiiState.apply().defence + up > 200 =>
-        ishii.copy(
-          magicPower = fixMP(ishii.magicPower - Command.Scala.mp),
-          defence = IshiiState.apply().defence + 200,
-          log = newLog :+ s":ishi: の しゅびりょくが" +
-            s" ${200 - ishii.defence} あがった！",
-          scalaTurn = ishii.scalaTurn - 1)
+        turn.copy(
+          ishiiState = turn.ishiiState.copy(
+            magicPower = fixMP(turn.ishiiState.magicPower - Command.Scala.mp),
+            defence = IshiiState.apply().defence + 200
+          ),
+          log = newLog + s":ishi: の しゅびりょくが" +
+            s" ${200 - turn.ishiiState.defence} あがった！",
+          scalaTurnNumber = turn.scalaTurnNumber - 1)
       case up =>
-        ishii.copy(
-          magicPower = fixMP(ishii.magicPower - Command.Scala.mp),
-          defence = ishii.defence + up,
-          log = newLog :+ s":ishi: の しゅびりょくが ${up} あがった！",
-          scalaTurn = if (ishii.scalaTurn == -1) 0 else ishii.scalaTurn - 1)
+        turn.copy(
+          ishiiState = turn.ishiiState.copy(
+            magicPower = fixMP(turn.ishiiState.magicPower - Command.Scala.mp),
+            defence = turn.ishiiState.defence + up
+          ),
+          log = newLog + s":ishi: の しゅびりょくが ${up} あがった！",
+          scalaTurnNumber = if (turn.scalaTurnNumber == -1) 0 else turn.scalaTurnNumber - 1)
     }
   }
 
   //防御
-  def doGuard(ishii: IshiiState): IshiiState =
-    ishii.copy(log = ishii.log :+ ":ishi: は みをまもっている。")
+  def doGuard(turn: TurnState): TurnState =
+    turn.copy(log = turn.log + ":ishi: は みをまもっている。")
 
   //まほうのせいすい
-  def doMagicalHolyWater(ishii: IshiiState): IshiiState = {
+  def doMagicalHolyWater(turn: TurnState): TurnState = {
     val txt: String = "\n :ishi: は まほうのせいすいを つかった！"
     val up: Int = Randomize.random.nextInt(20) + 1
     val limitedUp: Int =
-      if (ishii.magicPower + up > IshiiState.apply().magicPower)
-        IshiiState.apply().magicPower - ishii.magicPower
+      if (turn.ishiiState.magicPower + up > IshiiState.apply().magicPower)
+        IshiiState.apply().magicPower - turn.ishiiState.magicPower
       else up
 
-    if (ishii.magicPower < IshiiState.apply().magicPower)
-      ishii.copy(magicPower = ishii.magicPower + limitedUp,
-        log = ishii.log :+ (txt + s":ishi: の MPが ${limitedUp} かいふくした！"))
-    else ishii.copy(log = ishii.log :+ (txt + "しかし なにも おこらなかった。"))
+    if (turn.ishiiState.magicPower < IshiiState.apply().magicPower)
+      turn.copy(
+        ishiiState = turn.ishiiState.copy(
+          magicPower = turn.ishiiState.magicPower + limitedUp
+        ),
+        log = turn.log + (txt + s":ishi: の MPが ${limitedUp} かいふくした！"))
+    else turn.copy(log = turn.log + (txt + "しかし なにも おこらなかった。"))
   }
 
   //にげる
-  def doEscape(ishii: IshiiState): IshiiState = {
+  def doEscape(turn: TurnState): TurnState = {
     val actionMessage: String = ":ishi: は にげだした！"
     val isSuccessed: Boolean = Randomize.random.nextInt(4) == 0
 
     if (isSuccessed) {
-      val newMuteUsersList: List[String] = readFile(fileNameOfMuteUsers) :+ ishii.channelId
+      val newMuteUsersList: List[String] = readFile(fileNameOfMuteUsers) :+ turn.channelId
       writeListToFile(fileNameOfMuteUsers, newMuteUsersList)
-      ishii.copy(command = Some(Command.SuccessEscape), log = ishii.log :+ actionMessage)
+      turn.copy(
+        ishiiState = turn.ishiiState.copy(
+          command = Some(Command.SuccessEscape)
+        ),
+        log = turn.log + actionMessage)
     }
-    else ishii.copy(condition = ishii.condition,
-      log = List(actionMessage + "しかし まわりこまれてしまった！"))
+    else turn.copy(
+      ishiiState = turn.ishiiState.copy(
+        condition = turn.ishiiState.condition
+      ),
+      log = actionMessage + "しかし まわりこまれてしまった！"
+    )
   }
 
   // MPが負の値にならないように修正

@@ -13,8 +13,4 @@ object Condition {
 
   case object Fizzle extends Condition(label = "マホトーン", id = "fizzle")
 
-//  val fizzle: String = "fizzle"
-//  val poison: String = "poison"
-//  val dead: String = "dead"
-//  val escaped: String = "escaped"
 }

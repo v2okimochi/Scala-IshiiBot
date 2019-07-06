@@ -1,7 +1,6 @@
 package app
 
-import domain.{Condition, EnemyStates, IshiiState}
-import infra.Randomize
+import domain.{Condition, EnemyStates, IshiiState, Randomize}
 
 object EnemyTurn {
   def apply(ishii: IshiiState): IshiiState = {

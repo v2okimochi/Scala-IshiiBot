@@ -10,9 +10,7 @@ case object Scoring {
     val emptyScoreList: Seq[Score] = Seq.empty
     // ishiiを殺したユーザの翼
     val userNameKilledIshii: String = turnList.tail
-      .filter(_.ishiiState.condition == Some(Condition.Dead)).last
-      .userName
-    println(s"killed by $userNameKilledIshii")
+      .filter(_.ishiiState.condition == Some(Condition.Dead)).last.userName
 
     // ユーザごとに得点加算
     val scoreSet: Seq[Score] =
@@ -20,10 +18,7 @@ case object Scoring {
         Score(userName = ishii.userName,
           score = turnList.filter(_.userName == ishii.userName)
             .foldLeft(0)((now, next) =>
-              now + (
-                if (next.ishiiState.command.isDefined) next.ishiiState.command.get.score
-                else 0
-                )
+              now + (if (next.ishiiState.command.isDefined) next.ishiiState.command.get.score else 0)
             )
         )
       ).foldLeft(emptyScoreList)((now, next) => now :+ next)
@@ -31,8 +26,7 @@ case object Scoring {
     // ishiiを力尽きさせたユーザは減点
     val reducedScoreSet: Seq[Score] =
       scoreSet.map(user =>
-        if (user.userName == userNameKilledIshii) user.copy(score = user.score + deadScore)
-        else user
+        if (user.userName == userNameKilledIshii) user.copy(score = user.score + deadScore) else user
       ).foldLeft(emptyScoreList)((now, next) => now :+ next)
 
     reducedScoreSet.sortBy(_.score).reverse //得点の高い順に並び替え

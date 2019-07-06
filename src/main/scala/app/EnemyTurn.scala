@@ -1,6 +1,6 @@
 package app
 
-import domain.{AttackCategory, AttackMessage, Condition, Enemy, IshiiState, Randomize, TurnState}
+import domain.{Condition, Enemy, IshiiState, Randomize, TurnState}
 
 object EnemyTurn {
   def apply(turn: TurnState): TurnState = {

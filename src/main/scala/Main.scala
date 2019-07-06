@@ -1,10 +1,13 @@
 import app.Turn
-import infra.{SlackClient, SlackClientImpl}
+import com.google.inject.{Guice, Inject}
+import infra.SlackClient
+import modules.SlackClientModule
 
-object Main extends Turn {
-  val slackClient: SlackClient =
-//    new SlackClientImpl
-          new infra.SlackClientLocalMock
+object Main {
+  def main(args: Array[String]): Unit =
+    Guice.createInjector(new SlackClientModule).getInstance(classOf[SlackListener]).listenSlack
+}
 
-  def main(args: Array[String]): Unit = slackClient.listen(switchMessage)
+class SlackListener @Inject()(slackClient: SlackClient) {
+  def listenSlack: Unit = slackClient.listen(new Turn(slackClient).switchMessage)
 }

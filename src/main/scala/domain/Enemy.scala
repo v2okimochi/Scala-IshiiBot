@@ -8,11 +8,7 @@ case class Enemy(
                 )
 
 object Enemy {
-  def getRandomEnemy: Enemy = {
-    val random = Randomize.random.nextInt(enemyList.length)
-    println(s"random: $random")
-    enemyList(random)
-  }
+  def getRandomEnemy: Enemy = enemyList(Randomize.random.nextInt(enemyList.length))
 
   val enemyList: Seq[Enemy] = Seq(
     Enemy(name = "JVM", force = 80, attackCategory = AttackCategory.NoCategory, attackMessage = AttackMessage.Neutral),

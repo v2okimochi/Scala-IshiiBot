@@ -1,11 +1,13 @@
 package app
 
-import domain.{Command, Condition, Enemy, Help, IshiiState, Randomize, Score, Scoring, TurnState}
+import com.google.inject. Singleton
+import domain.{Command, Condition, Enemy, Help, Randomize, Score, Scoring, TurnState}
 import infra.{FileAccess, SlackClient}
 import slack.models.Message
 
-trait Turn extends FileAccess {
-  val slackClient: SlackClient
+@Singleton
+class Turn(slackClient: SlackClient) extends FileAccess {
+  //  val slackClient: SlackClient
   private var turnList: Seq[TurnState] = Seq(
     TurnState.apply(enemy = Enemy.getRandomEnemy)
   )

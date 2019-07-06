@@ -15,7 +15,7 @@ object IshiiTurn extends FileAccess {
         case Some(Command.Guard) => doGuard(ishii.copy(log = newLog))
         case Some(Command.MagicalHolyWater) =>
           doMagicalHolyWater(ishii.copy(log = newLog))
-        case Some(Command.Escape) => doEscape(ishii.copy(log = newLog))
+        case Some(Command.FailureEscape) => doEscape(ishii.copy(log = newLog))
         case _ => throw new Exception("登録されていない行動です")
       }
     )

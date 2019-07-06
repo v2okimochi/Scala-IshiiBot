@@ -1,7 +1,5 @@
 import app.Turn
-import domain.{Command, Condition, Help, IshiiState, Score, Scoring}
-import infra.{FileAccess, SlackClient, SlackClientImpl}
-import slack.models.Message
+import infra.{SlackClient, SlackClientImpl}
 
 object Main extends Turn {
   val slackClient: SlackClient =

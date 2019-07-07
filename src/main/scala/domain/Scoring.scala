@@ -3,7 +3,7 @@ package domain
 sealed case class Score(val userName: String, val score: Int)
 
 case object Scoring {
-  private val deadScore: Int = -500
+  private val deadScore: Int = -1000
 
   def getScoreList(turnList: Seq[TurnState]): Seq[Score] = {
     val userSet: Set[TurnState] = turnList.tail.toSet // ユーザ一覧として使う

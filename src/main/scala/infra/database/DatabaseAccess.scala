@@ -17,9 +17,3 @@ trait DatabaseAccess extends FileAccess {
     UserTable.createMe
   }
 }
-
-//object main {
-//  def main(args: Array[String]): Unit = {
-//    Turntable.selectAllAsMapList.foreach(x => println(x))
-//  }
-//}

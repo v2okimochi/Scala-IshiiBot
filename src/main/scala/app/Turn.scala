@@ -1,8 +1,9 @@
 package app
 
-import com.google.inject. Singleton
+import com.google.inject.Singleton
 import domain.{Command, Condition, Enemy, Help, Randomize, Score, Scoring, TurnState}
-import infra.{FileAccess, SlackClient}
+import infra.SlackClient
+import infra.implement.FileAccess
 import slack.models.Message
 
 @Singleton

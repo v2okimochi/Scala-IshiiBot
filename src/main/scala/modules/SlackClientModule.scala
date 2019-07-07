@@ -1,7 +1,8 @@
 package modules
 
 import com.google.inject.AbstractModule
-import infra.{SlackClient, SlackClientImpl, SlackClientLocalMock}
+import infra.SlackClient
+import infra.implement.{SlackClientImpl, SlackClientLocalMock}
 
 class SlackClientModule extends AbstractModule {
   override def configure(): Unit =

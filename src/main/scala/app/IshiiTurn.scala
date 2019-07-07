@@ -4,6 +4,9 @@ import domain.{Command, Condition, IshiiState, Randomize, TurnState}
 import infra.implement.FileAccess
 
 object IshiiTurn extends FileAccess {
+  private val emptyMPMessage: String = "しかし MPがたりない！"
+  private val fizzledMessage: String = "しかし じゅもんは ふうじられている！"
+
   def apply(turn: TurnState): TurnState = {
     val newLog: String = turn.log + s"${turn.userName} のターン:"
 
@@ -13,8 +16,8 @@ object IshiiTurn extends FileAccess {
       else turn.ishiiState.command match {
         case Some(Command.Scala) => doScala(turn.copy(log = newLog))
         case Some(Command.Guard) => doGuard(turn.copy(log = newLog))
-        case Some(Command.MagicalHolyWater) =>
-          doMagicalHolyWater(turn.copy(log = newLog))
+        case Some(Command.MagicalHolyWater) => doMagicalHolyWater(turn.copy(log = newLog))
+        case Some(Command.Heal) => doHeal(turn.copy(log = newLog))
         case Some(Command.FailureEscape) => doEscape(turn.copy(log = newLog))
         case _ => throw new Exception("登録されていない行動です")
       }
@@ -45,21 +48,21 @@ object IshiiTurn extends FileAccess {
     val newLog: String = turn.log + "\n :ishi: は Scalaを となえた！"
 
     // MP不足
-    if (turn.ishiiState.magicPower < 2) {
+    if (isEmptyMP(mp = turn.ishiiState.magicPower, reduceMp = Command.Scala.mp)) {
       return turn.copy(
         ishiiState = turn.ishiiState.copy(
           magicPower = fixMP(turn.ishiiState.magicPower - Command.Scala.mp)
         ),
-        log = newLog + "しかし MPがたりない！")
+        log = newLog + emptyMPMessage)
     }
 
     //呪文封じ
-    if (turn.ishiiState.condition == Condition.Fizzle.id) {
+    if (isFizzled(turn.ishiiState.condition)) {
       return turn.copy(
         ishiiState = turn.ishiiState.copy(
           magicPower = fixMP(turn.ishiiState.magicPower - Command.Scala.mp)
         ),
-        log = newLog + "しかし じゅもんは ふうじられている！")
+        log = newLog + fizzledMessage)
     }
 
     //守備力の上昇上限
@@ -78,14 +81,14 @@ object IshiiTurn extends FileAccess {
       case 2 => IshiiState.apply().defence //DQ3
       case 3 => (IshiiState.apply().defence * 1.5).toInt //DQ4
     }) match {
-      case up if IshiiState.apply().defence + up > 200 =>
+      case up if turn.ishiiState.defence + up > IshiiState.apply().defence + 200 =>
         turn.copy(
           ishiiState = turn.ishiiState.copy(
             magicPower = fixMP(turn.ishiiState.magicPower - Command.Scala.mp),
             defence = IshiiState.apply().defence + 200
           ),
           log = newLog + s":ishi: の しゅびりょくが" +
-            s" ${200 - turn.ishiiState.defence} あがった！",
+            s" ${(IshiiState.apply().defence + 200) - turn.ishiiState.defence} あがった！",
           scalaTurnNumber = turn.scalaTurnNumber - 1)
       case up =>
         turn.copy(
@@ -94,7 +97,8 @@ object IshiiTurn extends FileAccess {
             defence = turn.ishiiState.defence + up
           ),
           log = newLog + s":ishi: の しゅびりょくが ${up} あがった！",
-          scalaTurnNumber = if (turn.scalaTurnNumber == -1) 0 else turn.scalaTurnNumber - 1)
+          scalaTurnNumber = 0
+        )
     }
   }
 
@@ -120,6 +124,34 @@ object IshiiTurn extends FileAccess {
     else turn.copy(log = turn.log + (txt + "しかし なにも おこらなかった。"))
   }
 
+  //ホイミ
+  def doHeal(turn: TurnState): TurnState = {
+    val actionMessage: String = ":ishi: は ホイミをとなえた！"
+
+    if (isEmptyMP(mp = turn.ishiiState.magicPower, reduceMp = Command.Heal.mp))
+      return turn.copy(
+        log = turn.log + actionMessage + emptyMPMessage
+      )
+
+    if (isFizzled(condition = turn.ishiiState.condition))
+      return turn.copy(
+        ishiiState = turn.ishiiState.copy(
+          magicPower = fixMP(turn.ishiiState.magicPower - Command.Heal.mp)
+        ),
+        log = turn.log + actionMessage + fizzledMessage
+      )
+
+    val amount: Int = Randomize.random.nextInt(30) + 10
+
+    turn.copy(
+      ishiiState = turn.ishiiState.copy(
+        hitPoint = fixHP(turn.ishiiState.hitPoint + amount),
+        magicPower = fixMP(turn.ishiiState.magicPower - Command.Heal.mp)
+      ),
+      log = turn.log + actionMessage + s":ishi: のHPが $amount かいふくした！"
+    )
+  }
+
   //にげる
   def doEscape(turn: TurnState): TurnState = {
     val actionMessage: String = ":ishi: は にげだした！"
@@ -142,6 +174,16 @@ object IshiiTurn extends FileAccess {
     )
   }
 
+  // HPが最大値を超えないように修正
+  private def fixHP(hp: Int): Int = IshiiState.apply().hitPoint match {
+    case maxHP if hp > maxHP => maxHP
+    case _ => hp
+  }
+
   // MPが負の値にならないように修正
   private def fixMP(mp: Int): Int = if (mp < 0) 0 else mp
+
+  private def isEmptyMP(mp: Int, reduceMp: Int): Boolean = mp < reduceMp
+
+  private def isFizzled(condition: Option[Condition]): Boolean = condition == Some(Condition.Fizzle)
 }

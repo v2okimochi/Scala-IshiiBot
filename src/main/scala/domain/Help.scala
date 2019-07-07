@@ -9,6 +9,15 @@ object Help {
 
   object Status extends Preference(id = "status")
 
+  def getStatusMessage(ishii: IshiiState, randomNumber: Int): String = {
+    val hpMessage: String = s":ishi: のHPは のこり${ishii.hitPoint}よ。"
+    val filteredMessageList: Seq[StatusMessages] = statusMessageList
+      .filter(ishii.hitPoint >= _.minHP)
+      .filter(ishii.hitPoint <= _.maxHP)
+    val index: Int = randomNumber % filteredMessageList.length
+    hpMessage + filteredMessageList(index).message
+  }
+  
   def search(text: String): Option[String] = {
     text match {
       case "ish status" => Some(Status.id)
@@ -46,13 +55,4 @@ object Help {
     StatusMessages(0, 9,
       ":ishi: は もうダメだわ…… つよく いきてね。")
   )
-
-  def getStatusMessage(ishii: IshiiState, randomNumber: Int): String = {
-    val hpMessage: String = s":ishi: のHPは のこり${ishii.hitPoint}よ。"
-    val filteredMessageList: Seq[StatusMessages] = statusMessageList
-      .filter(ishii.hitPoint >= _.minHP)
-      .filter(ishii.hitPoint <= _.maxHP)
-    val index: Int = randomNumber % filteredMessageList.length
-    hpMessage + filteredMessageList(index).message
-  }
 }

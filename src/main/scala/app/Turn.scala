@@ -55,7 +55,8 @@ class Turn(slackClient: SlackClient) extends FileAccess {
         log = ""))
 
     if (stateOfTurn.ishiiState.command.isDefined) turnList :+= stateOfTurn
-    //    debugStatusPrint(ishiiList.last)
+    
+    debugStatusPrint(stateOfTurn)
 
     // 1ターンのログを発言
     slackClient.sendMessage(message, turnList.last.log.mkString)

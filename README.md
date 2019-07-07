@@ -71,6 +71,17 @@
 - botのMPを1～20の範囲でランダムに回復します
 - 魔法の力でMPが増えるのでMagical Holy Waterです
 
+## ホイミ
+【完全一致】
+
+`ish heal`
+
+【部分一致】
+
+`ホイミ`
+
+- botのHPを10～40の範囲でランダムに回復します
+
 ## にげる
 `にげる`
 
@@ -97,32 +108,31 @@ Copyright (c) 2015 Bryan Gilbert
 Released under the MIT license
 
 ## 開発者の方は、ローカル環境でbotを動かすことができます
-- slackとlocalどちらで動かすかは、infra.SlackClient
-.scalaのSlackClientImplクラスとSlackClientLocalMockどちらを使うかで決めます
-- Main.scalaのMainオブジェクト内でどちらをインスタンス化するか指定してください（初期設定はSlackClientImpl）
-
-## ishiiの状態を変えたい
-- ishiiの状態はIshiiState型としてIshiiState.scalaにまとめています
-- 各メソッドは「IshiiState型オブジェクトの一部を変えたコピー」を作って戻り値としま
-- 多くのメソッドがIshiiState型を受け取って同じIshiiState型を返すのはそのためです
-- HPや守備力などの状態を変えたい場合は、IshiiStateオブジェクトのcopyメソッドを呼び出す際に任意の値を指定してください
-
-例：
-```scala
-ishii.copy(hitPoint = ishii.hitPoint - 20)
-```
-
-- また、ishiiの状態を初期値に戻したい場合はapply()メソッドを利用できます
-
-```scala
-ishii.copy(hitPoint = IshiiState.apply().hitPoint)
-```
+- slackとlocalどちらで動かすかは、 `modules/SlackClientModule`で指定します
+- Slackで使う場合はSlackClientImplと、ローカルコンソールで使う場合はSlackClientLocalMockと接続してください
 
 ## ishiiの行動を増やしたい
 - ishiiの行動選択肢はCommand.scalaにまとめています
-- Commandを継承したオブジェクトを設定し、どの発言に反応させたいかをparseメソッド内に追記します
-- 最後にIshiiTurn.scalaのdoXXXメソッドとして実際の処理を追記します
-- 追記したメソッドをapplyメソッド内で紐付ければbotが行動できるようになります
+- 新たな行動を追加するにはオブジェクトを以下のように追記し、どの発言に反応させたいかを指定します
+
+```scala
+case object Scala extends Command(label = "Scala", mp = 2, score = 100) {
+    // 部分一致で反応させたいコマンド
+    override val substrings: Set[String] = Set(
+      "すから",
+      "すくると"
+    )
+    // 完全一致で反応させたいコマンド
+    override val perfectMatchingWords: Set[String] = Set(
+      "ish scala",
+      "スカラ",
+      "スクルト"
+    )
+ }
+```
+
+- 次に `IshiiTurn.scala`の `doXXX(turn: TurnState)`として実際の処理を追記します
+- 最後に、追記した `doXXX()`を `apply()`内で紐付ければbotが行動できるようになります
 
 ## ish statusをリッチにしたい
 - statusなど行動と無関係な処理はHelp.scalaにまとめています

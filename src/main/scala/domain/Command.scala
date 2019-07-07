@@ -1,14 +1,14 @@
 package domain
 
 // ishiiの行動選択肢
-sealed abstract class Command(val label: String, val mp: Int, val score: Int){
+sealed abstract class Command(val label: String, val mp: Int, val score: Int) {
   val substrings: Set[String] = Set.empty
   val perfectMatchingWords: Set[String] = Set.empty
 }
 
 object Command {
 
-  case object Scala extends Command("Scala", 2, 100){
+  case object Scala extends Command(label = "Scala", mp = 2, score = 100) {
     override val substrings: Set[String] = Set(
       "すから",
       "すくると"
@@ -20,7 +20,7 @@ object Command {
     )
   }
 
-  case object Guard extends Command("ぼうぎょ", 0, 50){
+  case object Guard extends Command(label = "ぼうぎょ", mp = 0, score = 50) {
     override val substrings: Set[String] = Set.empty
     override val perfectMatchingWords: Set[String] = Set(
       "ぼうぎょ",
@@ -28,7 +28,12 @@ object Command {
     )
   }
 
-  case object MagicalHolyWater extends Command("まほうのせいすい", 0, 150){
+  case object Heal extends Command("ホイミ", mp = 3, score = 100) {
+    override val substrings: Set[String] = Set("ホイミ")
+    override val perfectMatchingWords: Set[String] = Set("ish heal")
+  }
+
+  case object MagicalHolyWater extends Command("まほうのせいすい", 0, 150) {
     override val substrings: Set[String] = Set(
       "まほうのせいすい"
     )
@@ -38,21 +43,21 @@ object Command {
     )
   }
 
-  sealed abstract class Escape extends Command("にげる", 0, -500){
+  sealed abstract class Escape extends Command("にげる", 0, -500) {
     override val perfectMatchingWords: Set[String] = Set(
       "にげる"
     )
   }
 
-  case object FailureEscape extends Escape{
-    override val label: String ="にげる (失敗)"
+  case object FailureEscape extends Escape {
+    override val label: String = "にげる (失敗)"
   }
 
-  case object SuccessEscape extends Escape{
+  case object SuccessEscape extends Escape {
     override val label = "にげる (成功)"
   }
 
-  case object Fight extends Command("たたかう", 0, 0){
+  case object Fight extends Command("たたかう", 0, 0) {
     override val perfectMatchingWords: Set[String] = Set(
       "たたかう"
     )
@@ -65,7 +70,7 @@ object Command {
     isMatchedCommand(commandString, Fight)
 
   def parse(commandString: String): Option[Command] =
-    Seq(Scala, Guard, MagicalHolyWater)
+    Seq(Scala, Guard, MagicalHolyWater, Heal)
       .find(isMatchedCommand(commandString, _))
 
   private def isMatchedCommand(commandString: String, command: Command): Boolean =

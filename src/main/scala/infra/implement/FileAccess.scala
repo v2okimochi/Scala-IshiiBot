@@ -1,6 +1,7 @@
-package infra
+package infra.implement
 
 import java.io.{File, PrintWriter}
+
 import scala.io.Source
 import scala.util.{Failure, Success, Try}
 
@@ -20,4 +21,6 @@ trait FileAccess {
     try textList.foreach(row => fileSource.write(row + "\n"))
     finally fileSource.close()
   }
+
+  def isExistFile(fileName: String): Boolean = !new File(fileName).exists()
 }

@@ -1,6 +1,7 @@
-package infra
+package infra.implement
 
 import akka.actor.ActorSystem
+import infra.SlackClient
 import slack.api.{BlockingSlackApiClient, SlackApiClient}
 import slack.models.Message
 import slack.rtm.SlackRtmClient

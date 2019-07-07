@@ -1,5 +1,6 @@
-package infra
+package infra.implement
 
+import infra.SlackClient
 import slack.models.Message
 
 import scala.io.StdIn

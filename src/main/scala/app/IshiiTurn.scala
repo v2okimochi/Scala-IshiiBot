@@ -1,7 +1,7 @@
 package app
 
 import domain.{Command, Condition, IshiiState, Randomize, TurnState}
-import infra.FileAccess
+import infra.implement.FileAccess
 
 object IshiiTurn extends FileAccess {
   def apply(turn: TurnState): TurnState = {

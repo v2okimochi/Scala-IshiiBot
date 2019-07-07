@@ -28,7 +28,7 @@ object Command {
     )
   }
 
-  case object MagicalHolyWater extends Command("まほうのせいすい", 0, 300){
+  case object MagicalHolyWater extends Command("まほうのせいすい", 0, 150){
     override val substrings: Set[String] = Set(
       "まほうのせいすい"
     )
@@ -38,7 +38,7 @@ object Command {
     )
   }
 
-  sealed abstract class Escape extends Command("にげる", 0, -100){
+  sealed abstract class Escape extends Command("にげる", 0, -500){
     override val perfectMatchingWords: Set[String] = Set(
       "にげる"
     )
